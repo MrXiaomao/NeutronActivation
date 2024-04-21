@@ -15,6 +15,9 @@ else()
   find_package(Geant4 REQUIRED)
 endif()
 
+find_package(HDF5 REQUIRED COMPONENTS C CXX)
+include_directories($HDF5_INCLUDE_DIRS)
+
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
 #
@@ -23,8 +26,13 @@ include(${Geant4_USE_FILE})
 #----------------------------------------------------------------------------
 # Locate sources and headers for this project
 #
+
+#set(HDF5_INCLUDE_DIRS /usr/local/hdf5) 
+
 include_directories(${PROJECT_SOURCE_DIR}/include 
                     ${Geant4_INCLUDE_DIR})
+
+#message(STATUS "INCLUDE LOCATION" ${HDF5_INCLUDE_DIRS})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 
@@ -32,7 +40,7 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 add_executable(Activation Activation.cc ${sources} ${headers})
-target_link_libraries(Activation ${Geant4_LIBRARIES} )
+target_link_libraries(Activation ${Geant4_LIBRARIES} -lstdc++fs ${HDF5_CXX_LIBRARIES} ${HDF5_LIBRARYES})
 
 #----------------------------------------------------------------------------
 # Copy all scripts to the build directory, i.e. the directory in which we

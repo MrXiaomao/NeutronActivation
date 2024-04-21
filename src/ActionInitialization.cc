@@ -61,12 +61,12 @@ ActionInitialization::~ActionInitialization()
 
 void ActionInitialization::BuildForMaster() const
 {
-  // 清楚历史输出文件
+  // 清除历史输出文件
   const char *path = "../OutPut/";
   G4String G4path = path;
   //判断文件夹是否存在，不存在则创建
   if (access(path, 0) == -1){   //如果文件夹不存在
-    mkdir(G4path,0777);
+    // mkdir(G4path,0777);
   }
   else{
     // 删除目录中的所有内容
@@ -78,6 +78,7 @@ void ActionInitialization::BuildForMaster() const
         G4cout << "删除文件夹失败：" << path << G4endl;
     }
   }
+  mkdir(G4path,0777);
 
   RunAction* runAction = new RunAction(fDetector, 0);
   SetUserAction(runAction);

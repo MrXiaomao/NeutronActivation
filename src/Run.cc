@@ -11,6 +11,10 @@
 #include <algorithm>  //sort
 #include <fstream>
 
+// #include "/home/xiaomao/Software/hdf5/hdf5-1.13.2/c++/src/H5Cpp.h"
+#include "H5Cpp.h"
+using namespace H5;
+
 // mutex in a file scope
 
 namespace {
@@ -322,6 +326,30 @@ void Run::EndOfRun()
   //按照key进行排序，升序
   // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//利用vector容器储存后再进行排序。 
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
+  G4String FILE_NAME = "energyDep.h5";
+  H5File *file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
+  /*
+    * Create a group in the file
+    */
+  Group *group = new Group(file->createGroup("Data"));
+  
+  /*
+    * Create the first dataset.
+  */
+  double h5data[] = {1.0,2.0,3.0,4.0,5.0};
+  hsize_t dims[1] = {5};
+  DataSpace dataspace(1,dims);
+  DataSet *dataset = new DataSet(
+      file->createDataSet("/Data/Data1", PredType::NATIVE_DOUBLE, dataspace));
+
+  dataset->write(h5data,PredType::NATIVE_DOUBLE);
+  /*
+  * Close the first dataset.
+  */
+  delete dataset;
+  delete group;
+  delete file;
+
 
   // 将各个核素的能量沉积数据输出
   G4String outPutPath = "../OutPut/";

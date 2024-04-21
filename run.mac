@@ -1,0 +1,28 @@
+#
+# Macro file for "Activation.cc"
+# in interactive mode
+#
+/control/verbose 1
+/run/verbose 1
+#
+/testhadr/activator/setMat G4_Zr
+/testhadr/activator/setThickness 1 mm
+/testhadr/activator/setRadius 19.05 mm
+#
+/run/numberOfThreads 16
+/run/initialize
+#
+# Set a very high time threshold to allow all decays to happen
+#/process/had/rdm/thresholdForVeryLongDecayTime 1.0e+2 year
+#
+/gps/particle neutron
+/gps/energy 14 MeV
+/gps/pos/type Plane
+/gps/pos/shape Circle
+/gps/pos/radius 19.05 mm
+/gps/pos/centre 0. 0. 22. mm
+
+/gps/direction 0.0 0.0 -1.0
+
+/run/printProgress 5000000
+/run/beamOn 1000000000

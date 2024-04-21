@@ -69,7 +69,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   //写入最新的衰变时间
   G4double time = aStep->GetPostStepPoint()->GetGlobalTime();
   if(process->GetProcessName() == "RadioactiveDecay") {
-    fEventAction->AddNewDacayTime(time);
+    fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),time);
   }
 
   // get volume of the current step
@@ -82,7 +82,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   // energy deposit
   //
-  G4double edepStep = aStep->GetTotalEnergyDeposit()/CLHEP::keV;
+  G4double edepStep = aStep->GetTotalEnergyDeposit();
   if (edepStep <= 0.) return; 
 
   

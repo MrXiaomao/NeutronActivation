@@ -38,6 +38,9 @@
 #include "G4VProcess.hh"
 #include "globals.hh"
 #include <map>
+#include <vector>
+#include <stdio.h>
+using namespace std;
 
 class DetectorConstruction;
 class G4ParticleDefinition;
@@ -55,7 +58,7 @@ class Run : public G4Run
     void CountProcesses(const G4VProcess* process);
     void ParticleCount(G4String, G4double, G4double); 
     void AddEdep(G4double edep);
-    void AddTimeEdep(std::map<G4double, G4double> timeSpec);
+    void AddTimeEdep(std::map<G4String, G4double> timeSpec);
     void AddEflow (G4double eflow);                   
     void ParticleFlux(G4String, G4double);
 
@@ -84,8 +87,8 @@ class Run : public G4Run
     void Merge(std::map<G4String,ParticleData>& destinationMap,
                const std::map<G4String,ParticleData>& sourceMap) const;
 
-    void Merge(std::map<G4double, G4double>& destinationMap,
-               const std::map<G4double, G4double>& sourceMap) const;
+    void Merge(std::map<G4String, vector<G4double>>& destinationMap,
+               const std::map<G4String, vector<G4double>>& sourceMap) const;
 
     static std::map<G4String,G4int> fgIonMap;
     static G4int fgIonId;
@@ -99,7 +102,7 @@ class Run : public G4Run
     std::map<G4String,G4int>        fProcCounter;
     std::map<G4String,ParticleData> fParticleDataMap1;                    
     std::map<G4String,ParticleData> fParticleDataMap2;
-    std::map<G4double, G4double> fAllTimeSpectrum;
+    std::map<G4String, vector<G4double>> fIronSpectrum;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

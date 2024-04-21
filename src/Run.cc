@@ -8,11 +8,9 @@
 #include "G4UnitsTable.hh"
 #include "G4SystemOfUnits.hh"
 
-#include<algorithm>  //sort
-#include<vector>
+#include <algorithm>  //sort
 #include <fstream>
-#include <stdio.h>
-using namespace std;
+
 // mutex in a file scope
 
 namespace {
@@ -71,22 +69,24 @@ void Run::Merge(std::map<G4String, ParticleData>& destinationMap,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void Run::Merge(std::map<G4double, G4double>& destinationMap,
-            const std::map<G4double, G4double>& sourceMap) const
+void Run::Merge(std::map<G4String, vector<G4double>>& destinationMap,
+            const std::map<G4String, vector<G4double>>& sourceMap) const
 {
-  std::map<G4double, G4double>::const_iterator itc;
-  for (itc = sourceMap.begin(); 
-       itc != sourceMap.end(); ++itc) {
-        std::map<G4double, G4double>::iterator it = destinationMap.find(itc->first);
+  std::map<G4String, vector<G4double>>::const_iterator itc;
+  for (itc = sourceMap.begin(); itc != sourceMap.end(); ++itc) 
+  {
+    std::map<G4String, vector<G4double>>::iterator it = destinationMap.find(itc->first);
 
-        //如果是新的时间，是则新增，否则合并到同一道址（视为同一事件）
-        if ( it == fAllTimeSpectrum.end()) {
-          destinationMap[itc->first] = itc->second;
-        }
-        else{
-          destinationMap[itc->first] += itc->second;
-        }
-
+    //如果是新的时间，是则新增，否则合并到同一道址（视为同一事件）
+    if ( it == fIronSpectrum.end()) {
+      destinationMap[itc->first] = itc->second;
+    }
+    else{
+      // 合并两个容器;
+      G4int TotalSize = destinationMap[itc->first].size() + itc->second.size();
+      destinationMap[itc->first].resize(TotalSize);
+      destinationMap[itc->first].insert(destinationMap[itc->first].end(),itc->second.begin(),itc->second.end());
+    }
   }
 }
 
@@ -143,9 +143,19 @@ void Run::AddEdep(G4double edep)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void Run::AddTimeEdep(std::map<G4double, G4double> timeSpec)
+void Run::AddTimeEdep(std::map<G4String, G4double> timeSpec)
 {
-  Merge(fAllTimeSpectrum,timeSpec);
+  for(const auto& timeDep : timeSpec){
+    std::map<G4String, vector<G4double>>::iterator it = fIronSpectrum.find(timeDep.first);
+    if ( it == fIronSpectrum.end()) {
+      vector<G4double> spec;
+      spec.push_back(timeDep.second);
+      fIronSpectrum[timeDep.first] = spec;
+    }
+    else{
+      fIronSpectrum[timeDep.first].push_back(timeDep.second);
+    }
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -227,8 +237,8 @@ void Run::Merge(const G4Run* run)
   //map: particles flux count       
   Merge(fParticleDataMap2, localRun->fParticleDataMap2);    
   
-  //map: time,dep
-  Merge(fAllTimeSpectrum,localRun->fAllTimeSpectrum);
+  //map: IronName,dep
+  Merge(fIronSpectrum,localRun->fIronSpectrum);
 
   G4Run::Merge(run); 
 } 
@@ -300,32 +310,36 @@ void Run::EndOfRun()
     G4String name = particleData.first;
     ParticleData data = particleData.second;
     G4int count = data.fCount;
-    G4double eMean = data.fEmean/count;
-    G4double eMin = data.fEmin;
-    G4double eMax = data.fEmax;
     G4double meanLife = data.fTmean;
          
     if (meanLife >= 0.){
       G4cout << "  " << std::setw(13) << name << ": " << std::setw(7) << count
-      G4cout << "\tmean life = " << G4BestUnit(meanLife, "Time")   << G4endl;
+             << "\tmean life = " << G4BestUnit(meanLife, "Time")   << G4endl;
     }
  }
 
   //time-deposit,keV
   //按照key进行排序，升序
-  vector< pair<G4double, G4double> > sortTimeDep(fAllTimeSpectrum.begin(),fAllTimeSpectrum.end());//利用vector容器储存后再进行排序。 
-  sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
+  // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//利用vector容器储存后再进行排序。 
+  // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
 
-  // print to file
+  // 将各个核素的能量沉积数据输出
+  G4String outPutPath = "../OutPut/";
+  G4String fileName;
   fstream datafile;
-	datafile.open("TimeDep.txt", ios::out);
-	if (!datafile.fail())
-	{
-    for ( const auto& timeDep : sortTimeDep ) {
-      G4double time = timeDep.first;
-      G4double depE = timeDep.second;
-      datafile<<setiosflags(ios::left)<<setw(20)<<time
-              <<setiosflags(ios::left)<<setw(12)<<depE<<G4endl;
+  for ( const auto& oneIroEdep : fIronSpectrum ) {
+    vector<G4double> energyEdp = oneIroEdep.second;
+    fileName = outPutPath + oneIroEdep.first + ".Spectrum";
+    // G4cout<<" fileName = "<<fileName<<G4endl;
+    datafile.open(fileName, ios::out|ios::ate);
+    if (!datafile.fail())
+    {
+      for(vector<G4double>::iterator iter = energyEdp.begin(); iter != energyEdp.end(); iter++)
+      {
+        if((*iter)>0.1*CLHEP::keV){
+          datafile<<(*iter)<<G4endl;
+        } 
+      }
     }
     datafile.close();
   }

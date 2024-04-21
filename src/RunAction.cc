@@ -76,10 +76,7 @@ G4Run* RunAction::GenerateRun()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void RunAction::BeginOfRunAction(const G4Run*)
-{    
-  fstream datafile;
-  datafile.open("TimeDepEvent.txt", ios::out);
-  datafile.close();
+{ 
   // show Rndm status
   if (isMaster) G4Random::showEngineStatus();
   

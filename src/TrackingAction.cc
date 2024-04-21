@@ -87,7 +87,6 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
   
   const G4ParticleDefinition* particle = track->GetParticleDefinition();
   G4String name     = particle->GetParticleName();
-//   if (name == "Zr89") G4cout<<"Zr89"<<G4endl;
   G4double meanLife = particle->GetPDGLifeTime();
   G4double ekin     = track->GetKineticEnergy();
   fTimeEnd         = track->GetGlobalTime();

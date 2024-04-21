@@ -39,6 +39,7 @@
 #include "globals.hh"
 #include <map>
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+class G4ParticleDefinition;
 
 class EventAction : public G4UserEventAction
 {
@@ -52,10 +53,13 @@ class EventAction : public G4UserEventAction
     
     void AddEdep (G4double Edep);
     void AddEflow(G4double Eflow);          
-    void AddNewDacayTime(G4double time);
+    void AddNewDacayTime(const G4ParticleDefinition* patticle,G4double time);
     void AddTimeEdep (G4double edep,G4double time);
+    G4String GetParentDecayIon(G4double time); //判断该次沉积能量时间所属的衰变母核名称
 
-    std::map<G4double, G4double> fDecaytimeSpectrum;
+    std::map<G4String, G4double> fIonDecayTime; 
+    // std::map<G4String ionName, vector<G4double>> fIonSpectrum;
+    std::map<G4String, G4double> fIonEdep; 
 
   private:
     G4double fTotalEnergyDeposit;

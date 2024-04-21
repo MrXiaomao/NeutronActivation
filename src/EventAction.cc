@@ -8,6 +8,9 @@
 #include "G4RunManager.hh"
 #include "G4UnitsTable.hh"
 
+#include "G4ParticleDefinition.hh"
+#include "G4IonTable.hh"
+
 #include <fstream>
 #include <stdio.h>
 using namespace std;
@@ -18,6 +21,9 @@ EventAction::EventAction()
 :G4UserEventAction(),
  fTotalEnergyDeposit(0.), fTotalEnergyFlow(0.)
 {
+  fstream datafile;
+  datafile.open("TimeDepEvent.txt", ios::out|ios::ate);
+  datafile.close();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -31,7 +37,9 @@ void EventAction::BeginOfEventAction(const G4Event*)
 {
   fTotalEnergyDeposit = 0.;
   fTotalEnergyFlow = 0.; 
-  fDecaytimeSpectrum[0] = 0.0;
+  fIonDecayTime.clear();
+  fIonEdep.clear();
+  // fIonDecayTime[0] = 0.0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -43,18 +51,10 @@ void EventAction::AddEdep(G4double Edep)
 
 void EventAction::AddTimeEdep(G4double edep,G4double time)
 {
-  // cout<<"time ="<<time/1000<<"ms "<<edep<<endl;
-  G4double time_microsecond = time/1000;
-  G4int pos = 0;
-
-  int iterator_i = 0;
-  std::map<G4double, G4double>::const_iterator itc;
-  for (itc = fDecaytimeSpectrum.begin(); 
-       itc != fDecaytimeSpectrum.end(); ++itc) {
-       if(time_microsecond >= itc->first) pos = iterator_i;
-       iterator_i++;
-  }
-  fDecaytimeSpectrum[pos] += edep;
+  edep /= CLHEP::keV;
+  G4String ionName = GetParentDecayIon(time);
+  // G4cout<<"AddTimeEdep "<<time<<" ns, dep= "<<edep<<"keV"<<G4endl;
+  if(ionName != "") fIonEdep[ionName] += edep;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -65,25 +65,60 @@ void EventAction::AddEflow(G4double Eflow)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void EventAction::AddNewDacayTime(G4double time)
+// 记录核素衰变的放射性时间
+// 如果两次衰变的时间相隔很短，则认为子核衰变是瞬发的，应该视为同一事件。
+void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double time)
 {
-  G4double time_microsecond = time;
-
-  std::map<G4double, G4double>::iterator it = fDecaytimeSpectrum.find(time_microsecond);
-  //如果是新的时间，则新增
-  if ( it == fDecaytimeSpectrum.end()) {
-    fDecaytimeSpectrum[time_microsecond] = 0.0;
+  //如果两次衰变的时间间隔大于指定数值，则认为是两个事件
+  G4bool istimeExit = false;
+  for ( const auto& IonDecayTime : fIonDecayTime) {
+    if(time - IonDecayTime.second < 20) {
+      istimeExit = true;
+      break;
+    }
   }
 
-  // cout<<"AddNewDacayTime "<<time/1000<<"ms "<<" "<<time_microsecond<<endl;
-  // for ( const auto& timeDep : fDecaytimeSpectrum ) {
-  //         long long time = timeDep.first;
-  //         G4double depE = timeDep.second;
-  //         cout<<"AddNewDacayTime "
-  //             <<setiosflags(ios::left)<<setw(13)<<time
-  //             <<setiosflags(ios::left)<<setw(12)<<depE<<G4endl;
-  // }
+  // 如果是一个新的时间，则添加
+  if(istimeExit)  return;
+
+  G4double meanLife = particle->GetPDGLifeTime();
+  if ((G4IonTable::IsIon(particle))&&(meanLife != 0.)) {
+      G4String name = particle->GetParticleName();
+      fIonDecayTime.insert(pair<G4String, G4double>(name,time));
+    // G4cout<<"IonName= "<<name<<" time="<<time<<"ns"<<G4endl;
+  }
+}
+
+//查找该时刻属于哪一次衰变时间
+G4String EventAction::GetParentDecayIon(G4double time)
+{
+  G4String ionName = "";
+ 
+  // 如果time小于阈值，则认为是活化产生瞬发粒子的能量沉积
+  G4double time_Threshold = 10*CLHEP::s;
+  if(time < time_Threshold) {
+    return ionName;
+  }
+
+  // 如果该次沉积能量的时间前面deltaT时间内不存在一次衰变时间，则认为不属于这次衰变事件。
+  G4bool istimeExit = false;
+  for ( const auto& IonDecayTime : fIonDecayTime) {
+    if(time - IonDecayTime.second < 20) {
+      istimeExit = true;
+      ionName = IonDecayTime.first;
+      // G4cout<<"GetParentDecayIon iron="<<ionName<<", deltaT = "<<(time - IonDecayTime.second)/CLHEP::ns<<" ns, ";
+      break;
+    }
+  }
+  
+  //若这一次沉积能量时刻不属于任何一次衰变核素的衰变事件，则打印异常
+  if(!istimeExit){
+    if(time>time_Threshold) {
+      G4cout<<"Warning from G4String EventAction::GetParentIon(G4double time): "<<time<<G4endl;
+    }
+  }
+
+  return ionName;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -97,22 +132,22 @@ void EventAction::EndOfEventAction(const G4Event* evt)
   run->AddEflow(fTotalEnergyFlow);
 
   //当统计到有数据时才进行累加，只有零时刻有数据则不统计。
-  if(fDecaytimeSpectrum.size()>1){
-    run->AddTimeEdep(fDecaytimeSpectrum);
-      
-      /*fstream datafile;
-      datafile.open("TimeDepEvent.txt", ios::out | ios::app);
-      if (!datafile.fail())
-      {
-        for ( const auto& timeDep : fDecaytimeSpectrum ) {
-          G4double time = timeDep.first;
-          G4double depE = timeDep.second;
-          datafile<<setiosflags(ios::left)<<setw(13)<<evt->GetEventID()
-                  <<setiosflags(ios::left)<<setw(13)<<time
-                  <<setiosflags(ios::left)<<setw(12)<<depE<<G4endl;
-        }
-        datafile.close();
-      }*/
+  if(fIonDecayTime.size()>0){
+    run->AddTimeEdep(fIonEdep);
+
+    fstream datafile;
+    datafile.open("TimeDepEvent.txt", ios::out | ios::app);
+    if (!datafile.fail())
+    {
+      for ( const auto& ironDep : fIonEdep ) {
+        G4String ironName = ironDep.first;
+        G4double depE = ironDep.second;
+        datafile<<setiosflags(ios::left)<<setw(13)<<evt->GetEventID()
+                <<setiosflags(ios::left)<<setw(13)<<ironName
+                <<setiosflags(ios::left)<<setw(12)<<depE<<G4endl;
+      }
+      datafile.close();
+    }
   }
 
   G4AnalysisManager::Instance()->FillH1(1,fTotalEnergyDeposit);

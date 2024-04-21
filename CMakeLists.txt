@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Setup the project
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project(Activation)
 
 #----------------------------------------------------------------------------
@@ -16,7 +16,11 @@ else()
 endif()
 
 find_package(HDF5 REQUIRED COMPONENTS C CXX)
-include_directories($HDF5_INCLUDE_DIRS)
+set(HDF5_INCLUDE_DIRS /usr/local/hdf5/include)
+
+include_directories(${HDF5_INCLUDE_DIRS})
+
+message(STATUS "INCLUDE LOCATION:" ${HDF5_INCLUDE_DIRS})
 
 #----------------------------------------------------------------------------
 # Setup Geant4 include directories and compile definitions
@@ -27,12 +31,10 @@ include(${Geant4_USE_FILE})
 # Locate sources and headers for this project
 #
 
-#set(HDF5_INCLUDE_DIRS /usr/local/hdf5) 
 
 include_directories(${PROJECT_SOURCE_DIR}/include 
                     ${Geant4_INCLUDE_DIR})
 
-#message(STATUS "INCLUDE LOCATION" ${HDF5_INCLUDE_DIRS})
 file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc)
 file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 

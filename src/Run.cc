@@ -82,18 +82,27 @@ void Run::Merge(std::map<G4String, vector<G4double>>& destinationMap,
   {
     std::map<G4String, vector<G4double>>::iterator it = destinationMap.find(itc->first);
 
-    //如果是新的时间，是则新增，否则合并到同一道址（视为同一事件）
+    //如果是新的核素，是则新增，否则合并到同一核素中
     if ( it == fIronSpectrum.end()) {
       destinationMap[itc->first] = itc->second;
     }
     else{
-      // 合并两个容器;
-      G4int TotalSize = destinationMap[itc->first].size() + itc->second.size();
-      destinationMap[itc->first].resize(TotalSize);
+      // 合并两个容器
       destinationMap[itc->first].insert(destinationMap[itc->first].end(),itc->second.begin(),itc->second.end());
     }
   }
 }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+void Run::Merge(vector<EdepTime>& destinationEdep,
+                const vector<EdepTime>& sourceEdep) const
+{
+  //容器拼接
+  destinationEdep.insert(destinationEdep.end(),sourceEdep.begin(),sourceEdep.end());
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -137,7 +146,13 @@ void Run::ParticleCount(G4String name, G4double Ekin, G4double meanLife)
     data.fTmean = meanLife;
   }   
 }
-                 
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+// 收集单个径迹在晶体中的沉积能量，并记录下径迹起点时间
+void Run::AddTrackEdep_Time(G4double energy, G4double time){
+  fEdep_time.push_back(EdepTime(energy,time));
+}
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void Run::AddEdep(G4double edep)
@@ -147,18 +162,22 @@ void Run::AddEdep(G4double edep)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-
-void Run::AddTimeEdep(std::map<G4String, G4double> timeSpec)
+// 收集各衰变母核的衰变事件中，在晶体中产生的总沉积能量。这里把级联衰变事件认为是同一事件。
+//（在EventAction::GetParentDecayIon中进行级联事件判断）
+void Run::AddIronEdep(std::map<G4String, G4double>& ironSpec)
 {
-  for(const auto& timeDep : timeSpec){
-    std::map<G4String, vector<G4double>>::iterator it = fIronSpectrum.find(timeDep.first);
-    if ( it == fIronSpectrum.end() && timeDep.second > 0.1*CLHEP::keV) {
-      vector<G4double> spec;
-      spec.push_back(timeDep.second);
-      fIronSpectrum[timeDep.first] = spec;
-    }
-    else{
-      fIronSpectrum[timeDep.first].push_back(timeDep.second);
+  for(const auto& ironDep : ironSpec){
+    std::map<G4String, vector<G4double>>::iterator it = fIronSpectrum.find(ironDep.first);
+    if(ironDep.second > 0.1*CLHEP::keV)
+    {
+      if ( it == fIronSpectrum.end()) {
+        vector<G4double> spec;
+        spec.push_back(ironDep.second);
+        fIronSpectrum[ironDep.first] = spec;
+      }
+      else{
+        fIronSpectrum[ironDep.first].push_back(ironDep.second);
+      }
     }
   }
 }
@@ -170,6 +189,7 @@ void Run::AddEflow(G4double eflow)
   fEnergyFlow += eflow;
   fEnergyFlow2 += eflow*eflow;
 }                  
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 void Run::ParticleFlux(G4String name, G4double Ekin)
@@ -243,7 +263,9 @@ void Run::Merge(const G4Run* run)
   Merge(fParticleDataMap2, localRun->fParticleDataMap2);    
   
   //map: IronName,dep
-  Merge(fIronSpectrum,localRun->fIronSpectrum);
+  Merge(fIronSpectrum, localRun->fIronSpectrum);
+  
+  Merge(fEdep_time, localRun->fEdep_time);
 
   G4Run::Merge(run); 
 } 
@@ -332,22 +354,22 @@ void Run::EndOfRun()
   write.CreateNewFile("../OutPut/EnergyDep.h5");
   write.CreateGroup("groupA");
 
-  // 将各个核素的能量沉积数据输出
+  // 将各个核素的衰变事件中能量沉积数据输出
   G4String outPutPath = "../OutPut/";
-  G4String fileName;
-  fstream datafile;
+  // G4String fileName;
+  // fstream datafile;
   for ( const auto& oneIroEdep : fIronSpectrum ) {
     vector<G4double> energyEdp = oneIroEdep.second;
-    fileName = outPutPath + oneIroEdep.first + ".Spectrum";
+    // fileName = outPutPath + oneIroEdep.first + ".Spectrum";
 
-    //将文件写入HDF5
+    //将数据写入HDF5
     int size = energyEdp.size();
-    write.CreateDataspace(1, 1, size);
+    write.CreateDataspace(1, 1, size);  //秩，列，行
     write.CreateDoubleDataset(oneIroEdep.first);
     write.WriteDoubleValue(energyEdp.data());
 
     // G4cout<<" fileName = "<<fileName<<G4endl;
-    datafile.open(fileName, ios::out|ios::ate);
+    /*datafile.open(fileName, ios::out|ios::ate);
     if (!datafile.fail())
     {
       for(vector<G4double>::iterator iter = energyEdp.begin(); iter != energyEdp.end(); iter++)
@@ -355,8 +377,42 @@ void Run::EndOfRun()
         datafile<<(*iter)<<G4endl;
       }
     }
-    datafile.close();
+    datafile.close();*/
   }
+  write.CloseFile();
+  
+  // 输出各个粒子径迹的沉积能量和沉积时刻
+  //
+  vector<G4double> energyVec;
+  vector<G4double> timeVec;
+  vector<G4double> edep_timeVec;
+  for ( const auto& en_time : fEdep_time ) {
+    energyVec.push_back(en_time.Edep/CLHEP::keV);
+    timeVec.push_back(en_time.depTime);
+    edep_timeVec.push_back(en_time.Edep/CLHEP::keV);
+    edep_timeVec.push_back(en_time.depTime);
+  }
+  // 将文件写入HDF5
+  Hdf5WriteValue write2;
+  write2.CreateNewFile("../OutPut/EdepTime.h5");
+  write2.CreateGroup("Data");
+  // int size = energyVec.size();
+  // write2.CreateDataspace(1, 1, size);
+  // write2.CreateDoubleDataset("TackEdep");
+  // write2.WriteDoubleValue(energyVec.data());
+
+  // size = energyVec.size();
+  // G4cout<<"EdepTime size = "<<size<<G4endl;
+  // write2.CreateDataspace(2, 1, size);
+  // write2.CreateDoubleDataset("TackEdepTime");
+  // write2.WriteDoubleValue(timeVec.data());
+
+  int size = edep_timeVec.size()/2;
+  write2.CreateDataspace(2, 2, size);
+  write2.CreateDoubleDataset("Edep_Time");
+  write2.WriteDoubleValue(edep_timeVec.data());
+
+  write2.CloseFile();
 
   // compute mean Energy deposited and rms
   //
@@ -386,7 +442,7 @@ void Run::EndOfRun()
  //particles flux
  //
  G4cout << "\n List of particles emerging from the target :" << G4endl;
-     
+
  for ( const auto& particleData : fParticleDataMap2 ) {
     G4String name = particleData.first;
     ParticleData data = particleData.second;

@@ -7,9 +7,9 @@
 #
 /testhadr/activator/setMat G4_Zr
 /testhadr/activator/setThickness 1 mm
-/testhadr/activator/setRadius 19.05 mm
+/testhadr/activator/setRadius 21.05 mm
 #
-/run/numberOfThreads 16
+/run/numberOfThreads 13
 /run/initialize
 #
 # Set a very high time threshold to allow all decays to happen
@@ -19,10 +19,11 @@
 /gps/energy 14 MeV
 /gps/pos/type Plane
 /gps/pos/shape Circle
-/gps/pos/radius 19.05 mm
+/gps/pos/radius 21.05 mm
 /gps/pos/centre 0. 0. 22. mm
 
 /gps/direction 0.0 0.0 -1.0
 
-/run/printProgress 1
-/run/beamOn 100
+/tracking/verbose 0
+/run/printProgress 100000
+/run/beamOn 10000000

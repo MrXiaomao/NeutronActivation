@@ -43,21 +43,22 @@
 
 #include "DetectorConstruction.hh"
 #include "PhysicsList.hh"
+// #include "QGSP_BERT_HP.hh"
 #include "ActionInitialization.hh"
 #include "SteppingVerbose.hh"
 
-#ifdef G4VIS_USE
- #include "G4VisExecutive.hh"
-#endif
-
-#ifdef G4UI_USE
+#include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
-#endif
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
 int main(int argc,char** argv) {
- 
+
+  G4UIExecutive* ui = 0;
+  if ( argc == 1 ) {
+    ui = new G4UIExecutive(argc, argv);
+  }
+
   //choose the Random engine
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
  
@@ -78,12 +79,18 @@ int main(int argc,char** argv) {
   runManager->SetUserInitialization(det);
   
   PhysicsList* phys = new PhysicsList;
+  // G4VUserPhysicsList* phys = new QGSP_BERT_HP;
   runManager->SetUserInitialization(phys);
   
   runManager->SetUserInitialization(new ActionInitialization(det));    
-     
+
+  // Initialize visualization
+  //
+  G4VisManager* visManager = new G4VisExecutive;
+  visManager->Initialize();
+
   // get the pointer to the User Interface manager 
-    G4UImanager* UI = G4UImanager::GetUIpointer();  
+  G4UImanager* UI = G4UImanager::GetUIpointer();  
 
   if (argc!=1)   // batch mode  
     {
@@ -94,24 +101,15 @@ int main(int argc,char** argv) {
     
   else           //define visualization and UI terminal for interactive mode
     { 
-#ifdef G4VIS_USE
-      G4VisManager* visManager = new G4VisExecutive;
-      visManager->Initialize();
-#endif    
-     
-#ifdef G4UI_USE
-      G4UIExecutive * ui = new G4UIExecutive(argc,argv);      
+      // interactive mode
+      UI->ApplyCommand("/control/execute init_vis.mac");
       ui->SessionStart();
       delete ui;
-#endif
-          
-#ifdef G4VIS_USE
-     delete visManager;
-#endif     
     }
 
   // job termination 
   //
+  delete visManager;
   delete runManager;
 
   return 0;

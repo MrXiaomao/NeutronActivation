@@ -35,14 +35,17 @@
 #include "DetectorConstruction.hh"
 #include "Run.hh"
 #include "EventAction.hh"
+#include "TrackingAction.hh"
 #include "HistoManager.hh"
 
 #include "G4RunManager.hh"
-                           
+#include "Parameter.hh"             
+using namespace myConsts;
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* event)
-: G4UserSteppingAction(), fDetector(det), fEventAction(event),fScoringVolume(0)
+SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* event,TrackingAction* track)
+: G4UserSteppingAction(), fDetector(det), fEventAction(event),fTrackAction(track),fScoringVolume(0)
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -67,9 +70,9 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   }
   
   //写入最新的衰变时间
-  G4double time = aStep->GetPostStepPoint()->GetGlobalTime();
+  G4double decayTime = aStep->GetPostStepPoint()->GetGlobalTime();
   if(process->GetProcessName() == "RadioactiveDecay") {
-    fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),time);
+    fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),decayTime);
   }
 
   // get volume of the current step
@@ -87,10 +90,10 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   
   fEventAction->AddEdep(edepStep);
-  
+  fTrackAction->AddTrackEdep(edepStep);
   //只统计衰变之类的放射性，因此这里把短时间都不做统计
-  if(time>1*CLHEP::s){
-    fEventAction->AddTimeEdep(edepStep,time);
+  if(decayTime>gGountBeginTime){
+    fEventAction->AddTimeEdep(edepStep,decayTime);
   }
   
   

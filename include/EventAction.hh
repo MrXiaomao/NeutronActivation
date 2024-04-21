@@ -49,7 +49,7 @@ class EventAction : public G4UserEventAction
 
   public:
     virtual void BeginOfEventAction(const G4Event*);
-    virtual void   EndOfEventAction(const G4Event* evt);
+    virtual void EndOfEventAction(const G4Event* evt);
     
     void AddEdep (G4double Edep);
     void AddEflow(G4double Eflow);          
@@ -57,8 +57,10 @@ class EventAction : public G4UserEventAction
     void AddTimeEdep (G4double edep,G4double time);
     G4String GetParentDecayIon(G4double time); //判断该次沉积能量时间所属的衰变母核名称
 
+    //母核衰变时刻，<核素名，时刻>
     std::map<G4String, G4double> fIonDecayTime; 
-    // std::map<G4String ionName, vector<G4double>> fIonSpectrum;
+    
+    //在母核衰变事件的时间窗内，探测器中的总沉积能量。
     std::map<G4String, G4double> fIonEdep; 
 
   private:

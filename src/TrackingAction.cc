@@ -1,35 +1,3 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
-/// \file TrackingAction.cc
-/// \brief Implementation of the TrackingAction class
-//
-// $Id: TrackingAction.cc 69099 2013-04-18 12:25:19Z maire $
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #include "TrackingAction.hh"
 
@@ -45,6 +13,8 @@
 
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
+#include "Parameter.hh"
+using namespace myConsts;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -52,6 +22,7 @@ TrackingAction::TrackingAction(EventAction* event)
 :G4UserTrackingAction(), fEventAction(event)
 {
    fTimeBirth = fTimeEnd = 0.;
+   fTrackEdep = 0.0;
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -70,7 +41,13 @@ void TrackingAction::PreUserTrackingAction(const G4Track* track)
   G4String name     = particle->GetParticleName();
   G4double meanLife = particle->GetPDGLifeTime();
   G4double ekin     = track->GetKineticEnergy();
-  fTimeBirth       = track->GetGlobalTime();
+  fTimeBirth        = track->GetGlobalTime();
+  fTrackEdep        = 0.0;
+  
+  if(fTimeBirth > gTarckMaxTimeLimit) {
+     G4Track* aTrack = (G4Track*)track;
+     aTrack->SetTrackStatus(fStopAndKill);
+  }
 
   //count secondary particles
   if (track->GetTrackID() > 1)  run->ParticleCount(name,ekin,meanLife);
@@ -106,13 +83,21 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
        analysis->FillH1(id,time);
   }
 
- // keep only emerging particles
- G4StepStatus status = track->GetStep()->GetPostStepPoint()->GetStepStatus();
- if (status != fWorldBoundary) return; 
+  run->ParticleFlux(name,ekin);
+  
+  // limit the particle life
+  if(fTrackEdep>gTrackEdepThreshold && 
+     fTimeBirth>gGountBeginTime && fTimeBirth<gTarckMaxTimeLimit){
+         run->AddTrackEdep_Time(fTrackEdep,fTimeBirth);
+         // G4cout<<"EndTrack TotalEnergy="<<fTrackEdep/keV
+         //       <<" fTimeBirth="<< std::setprecision(8)<< std::setw(12)<<fTimeBirth<<G4endl;
+     } 
 
- fEventAction->AddEflow(ekin);
+  // keep only emerging particles
+  G4StepStatus status = track->GetStep()->GetPostStepPoint()->GetStepStatus();
+  if (status != fWorldBoundary) return; 
 
- run->ParticleFlux(name,ekin);
+  fEventAction->AddEflow(ekin);
 
  // histograms: energy flow and activities of emerging particles
  

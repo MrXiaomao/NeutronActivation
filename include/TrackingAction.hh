@@ -49,11 +49,16 @@ class TrackingAction : public G4UserTrackingAction {
 
     virtual void  PreUserTrackingAction(const G4Track*);   
     virtual void PostUserTrackingAction(const G4Track*);
+    
+    inline void AddTrackEdep(G4double en){
+      fTrackEdep += en;
+    };
 
   private:
     EventAction*        fEventAction;
 
     G4double fTimeBirth,  fTimeEnd;
+    G4double fTrackEdep;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

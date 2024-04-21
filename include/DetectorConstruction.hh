@@ -84,6 +84,12 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    G4Material*        fLaBr3Material = nullptr;
    G4LogicalVolume*   fLLaBr3 = nullptr;
    
+   G4Material*        fPMTMaterial = nullptr;
+   G4LogicalVolume*   fLPMT = nullptr;
+   
+   G4Material*        fCH2Material = nullptr;
+   G4LogicalVolume*   fLCH2 = nullptr;
+
    G4double           fWorldSizeX = 0.;
    G4double           fWorldSizeYZ = 0.;
    G4Material*        fWorldMaterial = nullptr;

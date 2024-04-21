@@ -40,20 +40,21 @@
 
 class DetectorConstruction;
 class EventAction;
-
+class TrackingAction;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class SteppingAction : public G4UserSteppingAction
 {
   public:
-    SteppingAction(DetectorConstruction*,EventAction*);
+    SteppingAction(DetectorConstruction*,EventAction*,TrackingAction*);
    ~SteppingAction();
 
     virtual void UserSteppingAction(const G4Step*);
     
   private:
     DetectorConstruction* fDetector;
-    EventAction*         fEventAction; 
+    EventAction*         fEventAction;
+    TrackingAction*      fTrackAction;
     G4LogicalVolume* fScoringVolume;
 };
 

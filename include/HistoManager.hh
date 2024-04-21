@@ -41,7 +41,7 @@
 //#include "g4xml.hh"
 
 const G4int kMaxHisto1 = 24;
-const G4int kMaxHisto2 = 94;
+const G4int kMaxHisto2 = 114;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 

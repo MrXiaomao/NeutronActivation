@@ -37,9 +37,11 @@
 
 #include "G4Box.hh"
 #include "G4Tubs.hh"
+#include "G4Cons.hh"
 #include "G4LogicalVolume.hh"
 #include "G4PVPlacement.hh"
 #include "G4UnionSolid.hh"
+#include "G4SubtractionSolid.hh"
 
 #include "G4GeometryManager.hh"
 #include "G4PhysicalVolumeStore.hh"
@@ -57,10 +59,10 @@ DetectorConstruction::DetectorConstruction():
   fScoringVolume(0)
 {
   // default geometrical parameters
-  fActThickness = 1*cm;
+  fActThickness = 1*mm;
   fActRadius    = 1*cm;
-  fWorldSizeX     = 1.2*fActThickness;
-  fWorldSizeYZ    = 1.2*fActRadius;
+  fWorldSizeX   = 2.*fActThickness;
+  fWorldSizeYZ  = 2.*fActRadius;
 
   // materials
   DefineMaterials();
@@ -113,10 +115,31 @@ void DetectorConstruction::DefineMaterials()
   //LaBr3
   G4Element* La  = new G4Element("Lanthanum" ,"La" , 57., 138.9*g/mole);
   G4Element* Br  = new G4Element("Bromine" ,"Br" , 35., 79.9*g/mole);
-  fLaBr3Material = new G4Material("LaBr3", 5.2*g/cm3, ncomponents=2,
-                            kStateLiquid, 593*kelvin, 150*bar);
-  fLaBr3Material->AddElement(La, natoms=1);
-  fLaBr3Material->AddElement(Br, natoms=3);
+  G4Element* Ce  = new G4Element("Cerium" ,"Ce" , 58., 140.116*g/mole);
+  fLaBr3Material = new G4Material("LaBr3", 5.2*g/cm3, ncomponents=3,
+                            kStateLiquid, 293*kelvin, 1*atmosphere);
+  fLaBr3Material->AddElement(La, 0.7495);
+  fLaBr3Material->AddElement(Br, 0.2005);
+  fLaBr3Material->AddElement(Ce, 0.05);
+  
+  //PMT
+  G4Element* Na  = new G4Element("Sodium" ,"Na" , 11., 22.9898*g/mole);
+  G4Element* Ca  = new G4Element("Calcium" ,"Ca" , 20., 40.078*g/mole);
+  G4Element* Si  = new G4Element("Silicon" ,"Si" , 14., 28.0855*g/mole);
+
+  fPMTMaterial = new G4Material("PMT", 2.5*g/cm3, ncomponents=4,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fPMTMaterial->AddElement(Na, natoms=1);
+  fPMTMaterial->AddElement(O, natoms=14);
+  fPMTMaterial->AddElement(Si, natoms=6);
+  fPMTMaterial->AddElement(Ca, natoms=1);
+  
+  //CH2
+  G4Element* CC  = new G4Element("Carbon" ,"C" , 6., 12.00*g/mole);
+  fCH2Material = new G4Material("CH2", 0.953*g/cm3, ncomponents=2,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fCH2Material->AddElement(CC, natoms=1);
+  fCH2Material->AddElement(H, natoms=2);
 
   // graphite
   G4Isotope* C12 = new G4Isotope("C12", 6, 12);  
@@ -167,8 +190,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
   // World
   //
-  fWorldSizeX     = 1.2*fActRadius;
-  fWorldSizeYZ    = 1.2*fActRadius;
+  fWorldSizeX     = 4.*fActRadius;
+  fWorldSizeYZ    = 4.*fActRadius;
   
   G4Box*
   sWorld = new G4Box("World",                                 //name
@@ -191,44 +214,131 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   //
   // G4Box* sAbsor = new G4Box("Absorber",                       //name
   //       fActThickness/2, c/2, fActRadius/2);   //dimensions
-  G4double radius_LaBr3 = fActRadius; //1.5*25.4*mm*0.5;
-  G4double thicknessZr = fActThickness; //2.0*mm;
+
+  //①Cap
+  // G4double fActRadius = fActRadius; //42.1*0.5;
+  G4double LengthZrCap = 18.71*mm;
+  G4double thicknessZr = fActThickness; //1.0*mm;
 
   G4Tubs* ZrSideSolid =    
-    new G4Tubs("ZrSideSolid", radius_LaBr3, radius_LaBr3 + thicknessZr, radius_LaBr3, 0.0*deg, 360*deg); 
+    new G4Tubs("ZrSideSolid", fActRadius-thicknessZr, fActRadius, LengthZrCap*0.5, 0.0*deg, 360*deg); 
   G4Tubs* ZrTopSolid =    
-    new G4Tubs("ZrSideSolid", 0., radius_LaBr3 + thicknessZr, thicknessZr*0.5, 0.0*deg,360*deg); 
+    new G4Tubs("ZrSideSolid", 0., fActRadius, thicknessZr*0.5, 0.0*deg,360*deg); 
 
-  G4ThreeVector translation_Zr = G4ThreeVector(0, 0, radius_LaBr3 + thicknessZr*0.5);
+  G4ThreeVector translation_Zr = G4ThreeVector(0, 0, LengthZrCap*0.5 + thicknessZr*0.5);
   G4UnionSolid* ZrSolid = new G4UnionSolid("ZrSolid", ZrSideSolid, ZrTopSolid, 0, translation_Zr);
   fLActivator = new G4LogicalVolume(ZrSolid,                        //shape
                                 fActiveMaterial,                //material
                                 fActiveMaterial->GetName());    //name
-                                
-            new G4PVPlacement(0,                         //no rotation
-                            G4ThreeVector(),             //at (0,0,0)
-                            fLActivator,                     //logical volume
-                            fActiveMaterial->GetName(),   //name
-                            lWorld,                      //mother  volume
-                            false,                       //no boolean operation
-                            0);                          //copy number
+  G4double posZ1 = LengthZrCap*0.5;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZ1),             //at (0,0,0)
+                    fLActivator,                     //logical volume
+                    fActiveMaterial->GetName(),   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
+
+  // Activator2 ,圆锥台
+  G4double LengthActivator2 = 8.35*mm;
+  G4Cons* Activator2 =  new G4Cons("Activator2",26.4*mm, 27.4*mm, fActRadius-thicknessZr, fActRadius, 8.35*mm*0.5, 0.,360.*deg);
+  G4LogicalVolume*
+  lActivator2 = new G4LogicalVolume(Activator2,                  //shape
+                             fActiveMaterial,            //material
+                             "Activator2");                  //name
+
+  G4double posZ2 = posZ1 - LengthZrCap*0.5 - LengthActivator2*0.5;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZ2),             //at (0,0,0)
+                    lActivator2,                     //logical volume
+                    "Activator2",   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
+
+  // PMT外部Zr套筒
+  G4double LengthActivator3 = 33.94*mm;
+  G4Tubs* Activator3 =    
+    new G4Tubs("Activator3", 26.4*mm, 27.4*mm, LengthActivator3*0.5, 0.0*deg, 360*deg);
+  G4LogicalVolume*
+  lActivator3 = new G4LogicalVolume(Activator3,                  //shape
+                             fActiveMaterial,            //material
+                             "Activator3");                  //name
+  G4double posZ3 = posZ2 - LengthActivator3*0.5 - LengthActivator2*0.5;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZ3),             //at (0,0,0)
+                    lActivator3,                     //logical volume
+                    "Activator3",   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
 
   // LaBr3
   //
+  G4double LengthLaBr3 = 1.5*25.4*mm;
   G4Tubs* LaBr3Solid =    
-    new G4Tubs("LaBr3Solid", 0.0, radius_LaBr3, radius_LaBr3, 0.0*deg, 360*deg); 
+    new G4Tubs("LaBr3Solid", 0.0, LengthLaBr3*0.5, LengthLaBr3*0.5, 0.0*deg, 360*deg); 
   fLLaBr3 = new G4LogicalVolume(LaBr3Solid,                        //shape
                                 fLaBr3Material,                //material
                                 fLaBr3Material->GetName());    //name
-                                
-            new G4PVPlacement(0,                         //no rotation
-                            G4ThreeVector(),             //at (0,0,0)
-                            fLLaBr3,                     //logical volume
-                            fLaBr3Material->GetName(),   //name
-                            lWorld,                      //mother  volume
-                            false,                       //no boolean operation
-                            0);                          //copy number
 
+  G4double posZLaBr3 = posZ1 - 1.0*mm - 0.5*LengthLaBr3 + LengthZrCap*0.5;
+  G4cout<<"posZLaBr3 = "<<posZLaBr3<<G4endl;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZLaBr3),   //at (0,0,0)
+                    fLLaBr3,                     //logical volume
+                    fLaBr3Material->GetName(),   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
+
+  //PMT
+  //
+  G4double thickPMT = 1.0*mm;
+  G4double LengthPMT = 2.0*25.4*mm;
+  G4Tubs* PMTOuterSolid =    
+    new G4Tubs("PMTOuterSolid", 0.0, LengthPMT*0.5, LengthPMT*0.5, 0.0*deg, 360*deg); 
+  G4Tubs* PMTAirSolid =    
+    new G4Tubs("PMTAirSolid", 0.0, (LengthPMT-thickPMT)*0.5, (LengthPMT-thickPMT)*0.5, 0.0*deg, 360*deg);
+
+  G4SubtractionSolid* PMTSolid =  new G4SubtractionSolid("PMTSolid", PMTOuterSolid, PMTAirSolid);
+  fLPMT = new G4LogicalVolume(PMTSolid,                        //shape
+                              fPMTMaterial,                //material
+                              "PMT");    //name
+
+  G4double posZPMT = posZLaBr3 - LengthLaBr3*0.5 - LengthPMT*0.5;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZPMT),   //at (0,0,0)
+                    fLPMT,                     //logical volume
+                    fPMTMaterial->GetName(),   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
+
+  //CH2
+  G4double CapThick = 2.0*mm;
+  G4double LengthCH2 = 30.9*mm - CapThick;
+  G4Tubs* CH2SolidSide =    
+    new G4Tubs("CH2SolidSide", LengthPMT*0.5, 54.8*mm*0.5, LengthCH2*0.5, 0.0*deg, 360*deg); 
+  G4Tubs* CH2SolidCap =    
+    new G4Tubs("CH2SolidCap", 0., 54.8*mm*0.5, 2.0*mm*0.5, 0.0*deg, 360*deg);
+
+  G4ThreeVector translation_CH2 = G4ThreeVector(0, 0, -LengthCH2*0.5 - CapThick*0.5);
+  G4UnionSolid* CH2Solid = new G4UnionSolid("CH2Solid", CH2SolidSide, CH2SolidCap, 0, translation_CH2);
+
+  fLCH2 = new G4LogicalVolume(CH2Solid,                        //shape
+                              fCH2Material,                //material
+                              "CH2");    //name
+
+  G4double posZCH2 = posZ3 - LengthCH2*0.5 - LengthActivator3*0.5;
+    new G4PVPlacement(0,                         //no rotation
+                    G4ThreeVector(0.,0.,posZCH2),   //at (0,0,0)
+                    fLCH2,                     //logical volume
+                    fCH2Material->GetName(),   //name
+                    lWorld,                      //mother  volume
+                    false,                       //no boolean operation
+                    0);                          //copy number
+  
   PrintParameters();
   fScoringVolume = fLLaBr3;
   //always return the root volume

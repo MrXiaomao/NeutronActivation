@@ -152,7 +152,7 @@ void Run::AddTimeEdep(std::map<G4String, G4double> timeSpec)
 {
   for(const auto& timeDep : timeSpec){
     std::map<G4String, vector<G4double>>::iterator it = fIronSpectrum.find(timeDep.first);
-    if ( it == fIronSpectrum.end()) {
+    if ( it == fIronSpectrum.end() && timeDep.second > 0.1*CLHEP::keV) {
       vector<G4double> spec;
       spec.push_back(timeDep.second);
       fIronSpectrum[timeDep.first] = spec;
@@ -327,33 +327,10 @@ void Run::EndOfRun()
   //按照key进行排序，升序
   // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//利用vector容器储存后再进行排序。 
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
-/*
-  G4String FILE_NAME = "energyDep.h5";
-  H5File *file = new H5File(FILE_NAME, H5F_ACC_TRUNC);
 
-  Group *group = new Group(file->createGroup("Data"));
-  
-
-  double h5data[] = {1.0,2.0,3.0,4.0,5.0};
-  hsize_t dims[1] = {5};
-  DataSpace dataspace(1,dims);
-  DataSet *dataset = new DataSet(
-      file->createDataSet("/Data/Data1", PredType::NATIVE_DOUBLE, dataspace));
-
-  dataset->write(h5data,PredType::NATIVE_DOUBLE);
-
-  delete dataset;
-  delete group;
-  delete file;
-*/
-  double h5data[] = {1.1,2.8,3.6,4.1,5.0};
   Hdf5WriteValue write;
-  write.CreateNewFile("first.h5");
-  //
-  write.CreateDataspace(1, 1, 5);
+  write.CreateNewFile("../OutPut/EnergyDep.h5");
   write.CreateGroup("groupA");
-  write.CreateDoubleDataset("datasetA");
-  write.WriteDoubleValue(h5data);
 
   // 将各个核素的能量沉积数据输出
   G4String outPutPath = "../OutPut/";
@@ -362,15 +339,20 @@ void Run::EndOfRun()
   for ( const auto& oneIroEdep : fIronSpectrum ) {
     vector<G4double> energyEdp = oneIroEdep.second;
     fileName = outPutPath + oneIroEdep.first + ".Spectrum";
+
+    //将文件写入HDF5
+    int size = energyEdp.size();
+    write.CreateDataspace(1, 1, size);
+    write.CreateDoubleDataset(oneIroEdep.first);
+    write.WriteDoubleValue(energyEdp.data());
+
     // G4cout<<" fileName = "<<fileName<<G4endl;
     datafile.open(fileName, ios::out|ios::ate);
     if (!datafile.fail())
     {
       for(vector<G4double>::iterator iter = energyEdp.begin(); iter != energyEdp.end(); iter++)
       {
-        if((*iter)>0.1*CLHEP::keV){
-          datafile<<(*iter)<<G4endl;
-        } 
+        datafile<<(*iter)<<G4endl;
       }
     }
     datafile.close();

@@ -17,7 +17,7 @@
 /gps/energy 14 MeV
 /gps/pos/type Plane
 /gps/pos/shape Circle
-/gps/pos/radius 19.05 mm
+/gps/pos/radius 21.05 mm
 /gps/pos/centre 0. 0. 22. mm
 
 /gps/direction 0.0 0.0 -1.0

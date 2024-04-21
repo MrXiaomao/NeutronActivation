@@ -64,8 +64,8 @@ void SteppingVerbose::TrackingStarted()
            << std::right << std::setw( 4) << "X" << "    "
            << std::right << std::setw( 4) << "Y" << "    "
            << std::right << std::setw( 4) << "Z" << "    "
-           << std::right << std::setw( 15) << "Time(ns)" << "  "
-           << std::right << std::setw( 6) << "KineE" << "    "
+           << std::right << std::setw( 15) << "Time(ns)" << "    "
+           << std::right << std::setw( 6) << "KineE" << "      "
            << std::right << std::setw( 9) << "dEStep"
            << std::right << std::setw(10) << "StepLeng"  
            << std::right << std::setw(10) << "TrakLeng"
@@ -78,8 +78,8 @@ void SteppingVerbose::TrackingStarted()
         << std::right << std::setw(6) << G4BestUnit(fTrack->GetPosition().y(),"Length")
         << std::right << std::setw(6) << G4BestUnit(fTrack->GetPosition().z(),"Length")
         << std::right << std::setprecision(8) << std::setw(12) << fStep->GetPreStepPoint()->GetGlobalTime() //G4BestUnit(fTrack->GetGlobalTime(),"Time")
-        << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fTrack->GetKineticEnergy(),"Energy")
-        << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fStep->GetTotalEnergyDeposit(),"Energy")
+        << std::right << std::setprecision(6) << std::setw(8) << G4BestUnit(fTrack->GetKineticEnergy(),"Energy")
+        << std::right << std::setprecision(6) << std::setw(8) << G4BestUnit(fStep->GetTotalEnergyDeposit(),"Energy")
         << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fStep->GetStepLength(),"Length")
         << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fTrack->GetTrackLength(),"Length")
         << std::right << std::setprecision(2) << std::setw(5) << fTrack->GetVolume()->GetName()
@@ -117,8 +117,8 @@ void SteppingVerbose::StepInfo()
         << std::right << std::setw(6) << G4BestUnit(fTrack->GetPosition().y(),"Length")
         << std::right << std::setw(6) << G4BestUnit(fTrack->GetPosition().z(),"Length")
         << std::right << std::setprecision(8) << std::setw(12) << fStep->GetPostStepPoint()->GetGlobalTime()
-        << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fTrack->GetKineticEnergy(),"Energy")
-        << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fStep->GetTotalEnergyDeposit(),"Energy")
+        << std::right << std::setprecision(6) << std::setw(8) << G4BestUnit(fTrack->GetKineticEnergy(),"Energy")
+        << std::right << std::setprecision(6) << std::setw(8) << G4BestUnit(fStep->GetTotalEnergyDeposit(),"Energy")
         << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fStep->GetStepLength(),"Length")
         << std::right << std::setprecision(2) << std::setw(5) << G4BestUnit(fTrack->GetTrackLength(),"Length")
         << std::right << std::setw(10) << fTrack->GetVolume()->GetName();

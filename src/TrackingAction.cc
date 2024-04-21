@@ -88,8 +88,11 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
   // limit the particle life
   if(fTrackEdep>gTrackEdepThreshold && 
      fTimeBirth>gGountBeginTime && fTimeBirth<gTarckMaxTimeLimit){
-         run->AddTrackEdep_Time(fTrackEdep,fTimeBirth);
-         // G4cout<<"EndTrack TotalEnergy="<<fTrackEdep/keV
+         // run->AddTrackEdep_Time(fTrackEdep,fTimeBirth);
+         //get the Event Number
+         // G4int eventNumber =
+         // G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+         // G4cout<<"eventID = "<<eventNumber<<", EndTrack TotalEnergy="<<fTrackEdep/keV
          //       <<" fTimeBirth="<< std::setprecision(8)<< std::setw(12)<<fTimeBirth<<G4endl;
      } 
 

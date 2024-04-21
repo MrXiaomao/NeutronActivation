@@ -11,10 +11,6 @@
 #include <algorithm>  //sort
 #include <fstream>
 
-// #include "/home/xiaomao/Software/hdf5/hdf5-1.13.2/c++/src/H5Cpp.h"
-// #include "H5Cpp.h"
-// using namespace H5;
-// #include <h5cpp/hdf5.hpp>
 #include "Hdf5Function.h"
 // mutex in a file scope
 
@@ -95,8 +91,8 @@ void Run::Merge(std::map<G4String, vector<G4double>>& destinationMap,
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void Run::Merge(vector<EdepTime>& destinationEdep,
-                const vector<EdepTime>& sourceEdep) const
+void Run::Merge(vector<TimeEdep>& destinationEdep,
+                const vector<TimeEdep>& sourceEdep) const
 {
   //容器拼接
   destinationEdep.insert(destinationEdep.end(),sourceEdep.begin(),sourceEdep.end());
@@ -150,7 +146,13 @@ void Run::ParticleCount(G4String name, G4double Ekin, G4double meanLife)
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // 收集单个径迹在晶体中的沉积能量，并记录下径迹起点时间
 void Run::AddTrackEdep_Time(G4double energy, G4double time){
-  fEdep_time.push_back(EdepTime(energy,time));
+  fTrackTime_dep.push_back(TimeEdep(time, energy));
+}
+
+
+// 收集每个event在晶体中的沉积能量及事件时间
+void Run::AddEventEdep_Time(vector<TimeEdep>& timeDep){
+  fEventTime_edep.insert(fEventTime_edep.end(),timeDep.begin(),timeDep.end());
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -265,7 +267,9 @@ void Run::Merge(const G4Run* run)
   //map: IronName,dep
   Merge(fIronSpectrum, localRun->fIronSpectrum);
   
-  Merge(fEdep_time, localRun->fEdep_time);
+  Merge(fTrackTime_dep, localRun->fTrackTime_dep);
+
+  Merge(fEventTime_edep, localRun->fEventTime_edep);
 
   G4Run::Merge(run); 
 } 
@@ -351,8 +355,6 @@ void Run::EndOfRun()
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
 
   Hdf5WriteValue write;
-  write.CreateNewFile("../OutPut/EnergyDep.h5");
-  write.CreateGroup("groupA");
 
   // 将各个核素的衰变事件中能量沉积数据输出
   G4String outPutPath = "../OutPut/";
@@ -364,10 +366,14 @@ void Run::EndOfRun()
 
     //将数据写入HDF5
     int size = energyEdp.size();
-    write.CreateDataspace(1, 1, size);  //秩，列，行
-    write.CreateDoubleDataset(oneIroEdep.first);
-    write.WriteDoubleValue(energyEdp.data());
-
+    if(size>0){
+      write.CreateNewFile("../OutPut/EnergyDep.h5");
+      write.CreateGroup("groupA");
+      write.CreateDataspace(1, 1, size);  //秩，列，行
+      write.CreateDoubleDataset(oneIroEdep.first);
+      write.WriteDoubleValue(energyEdp.data());
+      write.CloseFile();
+    }
     // G4cout<<" fileName = "<<fileName<<G4endl;
     /*datafile.open(fileName, ios::out|ios::ate);
     if (!datafile.fail())
@@ -379,40 +385,71 @@ void Run::EndOfRun()
     }
     datafile.close();*/
   }
-  write.CloseFile();
   
   // 输出各个粒子径迹的沉积能量和沉积时刻
   //
   vector<G4double> energyVec;
   vector<G4double> timeVec;
-  vector<G4double> edep_timeVec;
-  for ( const auto& en_time : fEdep_time ) {
-    energyVec.push_back(en_time.Edep/CLHEP::keV);
-    timeVec.push_back(en_time.depTime);
-    edep_timeVec.push_back(en_time.Edep/CLHEP::keV);
-    edep_timeVec.push_back(en_time.depTime);
-  }
   // 将文件写入HDF5
   Hdf5WriteValue write2;
-  write2.CreateNewFile("../OutPut/EdepTime.h5");
+  write2.CreateNewFile("../OutPut/TimeEdep.h5");
   write2.CreateGroup("Data");
-  // int size = energyVec.size();
-  // write2.CreateDataspace(1, 1, size);
-  // write2.CreateDoubleDataset("TackEdep");
-  // write2.WriteDoubleValue(energyVec.data());
+  // vector<G4double> edep_timeVec;
+  /*
+  for ( const auto& en_time : fTrackTime_dep ) {
+    G4double energy = en_time.Edep/CLHEP::keV;
+    if(energy>0.0001){
+      timeVec.push_back(en_time.depTime);
+      energyVec.push_back(energy);
+    }
+    // edep_timeVec.push_back(en_time.depTime);
+    // edep_timeVec.push_back(en_time.Edep/CLHEP::keV);
+  }
 
-  // size = energyVec.size();
-  // G4cout<<"EdepTime size = "<<size<<G4endl;
-  // write2.CreateDataspace(2, 1, size);
-  // write2.CreateDoubleDataset("TackEdepTime");
-  // write2.WriteDoubleValue(timeVec.data());
+  int size = energyVec.size();
+  G4cout<<"TimeEdep size = "<<size<<G4endl;
+  write2.CreateDataspace(1, 1, size);
+  write2.CreateDoubleDataset("TackEdepTime");
+  write2.WriteDoubleValue(timeVec.data());
 
-  int size = edep_timeVec.size()/2;
-  write2.CreateDataspace(2, 2, size);
-  write2.CreateDoubleDataset("Edep_Time");
-  write2.WriteDoubleValue(edep_timeVec.data());
+  size = energyVec.size();
+  write2.CreateDataspace(1, 1, size);
+  write2.CreateDoubleDataset("TackEdep");
+  write2.WriteDoubleValue(energyVec.data());
+  
+  //清空容器,及时释放系统内存
+  vector<G4double>().swap(timeVec);
+  vector<G4double>().swap(energyVec);
+  */
+  // int size = edep_timeVec.size()/2;
+  // write2.CreateDataspace(2, 2, size);
+  // write2.CreateDoubleDataset("Edep_Time");
+  // write2.WriteDoubleValue(edep_timeVec.data());
+  // write2.CloseFile();
 
+  for ( const auto& en_time : fEventTime_edep ) {
+    G4double energy = en_time.Edep/CLHEP::keV;
+    if(energy>0.001){
+      timeVec.push_back(en_time.depTime);
+      energyVec.push_back(energy);
+    }
+  }
+  int size = energyVec.size();
+  G4cout<<"TimeEdep size = "<<size<<G4endl;
+  write2.CreateDataspace(1, 1, size);
+  write2.CreateDoubleDataset("EventEdepTime");
+  write2.WriteDoubleValue(timeVec.data());
+
+  size = energyVec.size();
+  write2.CreateDataspace(1, 1, size);
+  write2.CreateDoubleDataset("EventEdep");
+  write2.WriteDoubleValue(energyVec.data());
+  
   write2.CloseFile();
+
+  //清空容器,及时释放系统内存
+  vector<G4double>().swap(timeVec);
+  vector<G4double>().swap(energyVec);
 
   // compute mean Energy deposited and rms
   //

@@ -1,28 +1,4 @@
-//
-// ********************************************************************
-// * License and Disclaimer                                           *
-// *                                                                  *
-// * The  Geant4 software  is  copyright of the Copyright Holders  of *
-// * the Geant4 Collaboration.  It is provided  under  the terms  and *
-// * conditions of the Geant4 Software License,  included in the file *
-// * LICENSE and available at  http://cern.ch/geant4/license .  These *
-// * include a list of copyright holders.                             *
-// *                                                                  *
-// * Neither the authors of this software system, nor their employing *
-// * institutes,nor the agencies providing financial support for this *
-// * work  make  any representation or  warranty, express or implied, *
-// * regarding  this  software system or assume any liability for its *
-// * use.  Please see the license in the file  LICENSE  and URL above *
-// * for the full disclaimer and the limitation of liability.         *
-// *                                                                  *
-// * This  code  implementation is the result of  the  scientific and *
-// * technical work of the GEANT4 collaboration.                      *
-// * By using,  copying,  modifying or  distributing the software (or *
-// * any work based  on the software)  you  agree  to acknowledge its *
-// * use  in  resulting  scientific  publications,  and indicate your *
-// * acceptance of all terms of the Geant4 Software license.          *
-// ********************************************************************
-//
+
 /// \file HistoManager.cc
 /// \brief Implementation of the HistoManager class
 //
@@ -74,7 +50,12 @@ void HistoManager::Book()
                          "74","75","76","77","78","79","80","81","82","83",
                          "84","85","86","87","88","89","90","91","92","93",
                          "94","95","96","97","98","99","100","101","102","103",
-                         "104","105","106","107","108","109","110","111","112","113"};
+                         "104","105","106","107","108","109","110","111","112","113",
+                         "114","115","116","117","118","119","120","121","122","123",
+                         "124","125","126","127","128","129","130","131","132","133",
+                         "134","135","136","137","138","139","140","141","142","143",
+                         "144","145","146","147","148","149","150","151","152","153",
+                         "154","155","156","157","158","159","160","161","162","163"};
 
   const G4String title[] = 
        { "dummy",                                                        //0

@@ -37,6 +37,7 @@ void EventAction::BeginOfEventAction(const G4Event*)
   fTotalEnergyFlow = 0.; 
   fIonDecayTime.clear();
   fIonEdep.clear();
+  fIonDecayTimeEnergy.clear();
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -46,10 +47,31 @@ void EventAction::AddEdep(G4double Edep)
   fTotalEnergyDeposit += Edep;
 }
 
-void EventAction::AddTimeEdep(G4double edep,G4double time)
+
+void EventAction::AddIronEdep(G4double edep,G4double time)
 {
   G4String ionName = GetParentDecayIon(time);
   if(ionName != "") fIonEdep[ionName] += edep;
+}
+
+void EventAction::AddTimeEdep(G4double edep,G4double time)
+{
+  // AddIronEdep(edep,time);
+
+  // 判别当前事件是否属于某一个核事件
+  G4bool isNotNewTime = false;
+  vector<TimeEdep>::iterator iter;
+  for( iter = fIonDecayTimeEnergy.begin(); iter != fIonDecayTimeEnergy.end(); iter++)    
+  {
+    G4double deltaTime = time - iter->depTime;
+    if( deltaTime >= 0. && deltaTime < gTimeWidth){
+      isNotNewTime = true;
+      iter->Edep += edep;
+      break;
+    }
+  }
+  TimeEdep point = TimeEdep(time,edep);
+  if(!isNotNewTime) fIonDecayTimeEnergy.push_back(point);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -67,15 +89,25 @@ void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double 
   // 不统计瞬发的核衰变事件
   if(time < gGountBeginTime) return;
 
+  // 记录各个母核衰变时刻
+  G4bool isNotNewTime = false;
+  for ( const auto& DecayTime : fIonDecayTimeEnergy) {
+    G4double deltaTime = time - DecayTime.depTime;
+    if(deltaTime>=0. && deltaTime < gTimeWidth) {
+      isNotNewTime = true;
+      break;
+    }
+  }
+  if(!isNotNewTime) fIonDecayTimeEnergy.push_back(TimeEdep(time,0.));
+
   G4String name = particle->GetParticleName();
 
   //如果两次衰变的时间间隔大于指定数值，则认为是两个事件
   G4bool istimeExit = false;
   for ( const auto& IonDecayTime : fIonDecayTime) {
     G4double deltaTime = time - IonDecayTime.second;
-    if(deltaTime>0. && deltaTime < gTimeWidth) {
+    if(deltaTime>=0. && deltaTime < gTimeWidth) {
       istimeExit = true;
-      // G4cout<<" istimeExit=true "<<deltaTime<<G4endl;
       break;
     }
   }
@@ -101,7 +133,7 @@ G4String EventAction::GetParentDecayIon(G4double time)
   }
 
   // 在当前事件中的所有母核衰变事件，查找time在哪一次衰变事件的时间窗内，并返回相应的母核名称
-  // 注意沉积能量的时刻一定位于母核衰变时刻之后，也就是只考虑deltaT>0.0
+  // 注意沉积能量的时刻一定位于母核衰变时刻之后，也就是只考虑deltaT>=0.0
   G4bool istimeExit = false;
   // 记录离该时刻最近的那次衰变事件，母核名称，以及离母核衰变时刻的时间差。
   G4String nearlyIronName = "";
@@ -139,7 +171,7 @@ G4String EventAction::GetParentDecayIon(G4double time)
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void EventAction::EndOfEventAction(const G4Event* evt)
+void EventAction::EndOfEventAction(const G4Event* )
 {
   Run* run = static_cast<Run*>(
              G4RunManager::GetRunManager()->GetNonConstCurrentRun());
@@ -150,25 +182,16 @@ void EventAction::EndOfEventAction(const G4Event* evt)
   //当统计到有数据时才进行累加，只有零时刻有数据则不统计。
   if(fIonDecayTime.size()>0){
     run->AddIronEdep(fIonEdep);
-
-    /*
-    fstream datafile;
-    datafile.open("../OutPut/TimeDepEvent.txt", ios::out | ios::app);
-    if (!datafile.fail())
-    {
-      for ( const auto& ironDep : fIonEdep ) {
-        G4String ironName = ironDep.first;
-        G4double depE = ironDep.second;
-        datafile<<setiosflags(ios::left)<<setw(13)<<evt->GetEventID()
-                <<setiosflags(ios::left)<<setw(13)<<ironName
-                <<setiosflags(ios::left)<<setw(12)<<depE<<G4endl;
-      }
-      datafile.close();
-    }*/
   }
-
-  // G4AnalysisManager::Instance()->FillH1(1,fTotalEnergyDeposit);
-  // G4AnalysisManager::Instance()->FillH1(3,fTotalEnergyFlow);  
+  if(fIonDecayTimeEnergy.size()>0){
+    run->AddEventEdep_Time(fIonDecayTimeEnergy);
+    // for(auto timeEn:fIonDecayTimeEnergy){
+    //   G4int eventNumber = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+    //   G4cout<<"eventID = "<<eventNumber<<", EndOfEvent "<<timeEn.depTime<<" ns,  "<<timeEn.Edep/CLHEP::keV<<G4endl;
+    // }
+  }
+  G4AnalysisManager::Instance()->FillH1(1,fTotalEnergyDeposit);
+  G4AnalysisManager::Instance()->FillH1(3,fTotalEnergyFlow);  
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

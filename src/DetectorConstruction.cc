@@ -283,7 +283,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
                                 fLaBr3Material->GetName());    //name
 
   G4double posZLaBr3 = posZ1 - 1.0*mm - 0.5*LengthLaBr3 + LengthZrCap*0.5;
-  G4cout<<"posZLaBr3 = "<<posZLaBr3<<G4endl;
+
     new G4PVPlacement(0,                         //no rotation
                     G4ThreeVector(0.,0.,posZLaBr3),   //at (0,0,0)
                     fLLaBr3,                     //logical volume

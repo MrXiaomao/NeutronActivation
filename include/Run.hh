@@ -40,6 +40,8 @@
 #include <map>
 #include <vector>
 #include <stdio.h>
+#include "Parameter.hh"
+using namespace myConsts;
 using namespace std;
 
 class DetectorConstruction;
@@ -60,6 +62,8 @@ class Run : public G4Run
     void AddEdep(G4double edep);
     void AddIronEdep(std::map<G4String, G4double>& ironSpec);
     void AddTrackEdep_Time(G4double energy, G4double time);
+    void AddEventEdep_Time(vector<TimeEdep>& timeDep);
+
     void AddEflow (G4double eflow);                   
     void ParticleFlux(G4String, G4double);
 
@@ -82,12 +86,6 @@ class Run : public G4Run
      G4double  fEmax;
      G4double  fTmean;
     };
-    struct EdepTime{
-      EdepTime():Edep(0.0),depTime(0.0){}
-      EdepTime(G4double a, G4double b):Edep(a),depTime(b){}
-      G4double Edep;
-      G4double depTime;
-    };
      
   private:
     // utility function
@@ -97,8 +95,8 @@ class Run : public G4Run
     void Merge(std::map<G4String, vector<G4double>>& destinationMap,
                const std::map<G4String, vector<G4double>>& sourceMap) const;
     
-    void Merge(vector<EdepTime>& destinationEdep,
-                const vector<EdepTime>& sourceEdep) const;
+    void Merge(vector<TimeEdep>& destinationEdep,
+                const vector<TimeEdep>& sourceEdep) const;
 
     static std::map<G4String,G4int> fgIonMap;
     static G4int fgIonId;
@@ -113,7 +111,8 @@ class Run : public G4Run
     std::map<G4String,ParticleData> fParticleDataMap1;                    
     std::map<G4String,ParticleData> fParticleDataMap2;
     std::map<G4String, vector<G4double>> fIronSpectrum;
-    vector<EdepTime> fEdep_time;
+    vector<TimeEdep> fTrackTime_dep;
+    vector<TimeEdep> fEventTime_edep;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

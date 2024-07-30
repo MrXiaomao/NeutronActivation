@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string>
+#include <string.h>
 #include <ctime>
 
 using namespace std;

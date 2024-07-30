@@ -7,7 +7,7 @@
 #define HDF5FUNCTION_H_
 using namespace std;
 
-//HDF5д����
+//HDF5写功能
 class Hdf5WriteValue
 {
 public:
@@ -15,8 +15,8 @@ public:
 	herr_t status;
 	hid_t dtype = H5Tcopy(H5T_C_S1);
 	
-	Hdf5WriteValue(){}; //���캯��
-	~Hdf5WriteValue(){};//��������
+	Hdf5WriteValue(){}; //构造函数
+	~Hdf5WriteValue(){};//析构函数
 	void CreateNewFile(string fileName);
 	void CreateStringDataspace(const void *data, int rank, int col, int row);
 	void CreateDataspace(int rank, int col, int row);
@@ -37,8 +37,8 @@ public:
 	herr_t status;
 	hid_t dtype = H5Tcopy(H5T_C_S1);
 
-	Hdf5ReadValue(){}; //���캯��
-	~Hdf5ReadValue(){};//��������
+	Hdf5ReadValue(){}; //构造函数
+	~Hdf5ReadValue(){};//析构函数
 	void OpenFile(const char* filepath);
 	void OpenGroup(const char* group);
 	void OpenDataset(const char* dataset);

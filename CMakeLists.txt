@@ -55,7 +55,6 @@ set(Activation_SCRIPTS
     envHadronic.csh
     envHadronic.sh
     Activation.in
-    plotHisto.C
     run.mac
     vis.mac
     init_vis.mac

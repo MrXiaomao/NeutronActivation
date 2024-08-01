@@ -129,6 +129,8 @@
         "variant": "cpp",
         "spline": "cpp",
         "event": "cpp",
-        "point": "cpp"
+        "point": "cpp",
+        "plot1.C": "cpp",
+        "plotHisto.C": "cpp"
     }
 }

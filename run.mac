@@ -20,7 +20,7 @@
 /gps/pos/type Plane
 /gps/pos/shape Circle
 /gps/pos/radius 21.05 mm
-/gps/pos/centre 0. 0. 22. mm
+/gps/pos/centre 0. 0. 55. mm
 
 /gps/direction 0.0 0.0 -1.0
 

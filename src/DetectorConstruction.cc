@@ -29,13 +29,13 @@ DetectorConstruction::DetectorConstruction():
 {
   // default geometrical parameters
   fActThickness = 1*mm;
-  fActRadius    = 1*cm;
+  fActRadius    = 1.905*cm;
   fWorldSizeX   = 2.*fActThickness;
   fWorldSizeYZ  = 2.*fActRadius;
 
   // materials
   DefineMaterials();
-  SetAbsorMaterial("G4_Co");
+  SetAbsorMaterial("G4_Zr");
 
   // create commands for interactive definition of the geometry
   fDetectorMessenger = new DetectorMessenger(this);
@@ -57,29 +57,7 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-  // specific element name for thermal neutronHP
-  // (see G4ParticleHPThermalScatteringNames.cc)
-
   G4int ncomponents, natoms;
-
-  // pressurized water
-  G4Element* H  = new G4Element("TS_H_of_Water" ,"H" , 1., 1.0079*g/mole);
-  G4Element* O  = new G4Element("Oxygen"        ,"O" , 8., 16.00*g/mole);
-  G4Material* H2O = 
-  new G4Material("Water_ts", 1.000*g/cm3, ncomponents=2,
-                            kStateLiquid, 593*kelvin, 150*bar);
-  H2O->AddElement(H, natoms=2);
-  H2O->AddElement(O, natoms=1);
-  H2O->GetIonisation()->SetMeanExcitationEnergy(78.0*eV);
-
-  // heavy water
-  G4Isotope* H2 = new G4Isotope("H2",1,2);
-  G4Element* D  = new G4Element("TS_D_of_Heavy_Water", "D", 1);
-  D->AddIsotope(H2, 100*perCent);  
-  G4Material* D2O = new G4Material("HeavyWater", 1.11*g/cm3, ncomponents=2,
-                        kStateLiquid, 293.15*kelvin, 1*atmosphere);
-  D2O->AddElement(D, natoms=2);
-  D2O->AddElement(O, natoms=1);
 
   //LaBr3
   G4Element* La  = new G4Element("Lanthanum" ,"La" , 57., 138.9*g/mole);
@@ -91,6 +69,20 @@ void DetectorConstruction::DefineMaterials()
   fLaBr3Material->AddElement(Br, 0.2005);
   fLaBr3Material->AddElement(Ce, 0.05);
   
+  //MgO反射层
+  G4Element* Mg  = new G4Element("Magnesium" ,"Mg" , 12., 24.3050*g/mole);
+  G4Element* O  = new G4Element("Oxygen"        ,"O" , 8., 16.00*g/mole);
+  fMgOMaterial = new G4Material("MgO", 3.58*g/cm3, ncomponents=2,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fMgOMaterial->AddElement(Mg, 1);
+  fMgOMaterial->AddElement(O, 1);
+
+  //Al合金
+  G4Element* Al  = new G4Element("Aluminium" ,"Al" , 13., 26.98*g/mole);  
+  fAlAlloyMaterial = new G4Material("AlAlloy", 2.65*g/cm3, ncomponents=1,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fAlAlloyMaterial->AddElement(Al,1);
+
   //PMT
   G4Element* Na  = new G4Element("Sodium" ,"Na" , 11., 22.9898*g/mole);
   G4Element* Ca  = new G4Element("Calcium" ,"Ca" , 20., 40.078*g/mole);
@@ -105,19 +97,11 @@ void DetectorConstruction::DefineMaterials()
   
   //CH2
   G4Element* CC  = new G4Element("Carbon" ,"C" , 6., 12.00*g/mole);
+  G4Element* H  = new G4Element("Hydrogen" ,"H" , 1., 1.0079*g/mole);
   fCH2Material = new G4Material("CH2", 0.953*g/cm3, ncomponents=2,
                             kStateSolid, 293*kelvin, 1*atmosphere);
   fCH2Material->AddElement(CC, natoms=1);
   fCH2Material->AddElement(H, natoms=2);
-
-  // graphite
-  G4Isotope* C12 = new G4Isotope("C12", 6, 12);  
-  G4Element* C   = new G4Element("TS_C_of_Graphite","C", ncomponents=1);
-  C->AddIsotope(C12, 100.*perCent);
-  G4Material* graphite = 
-  new G4Material("graphite", 2.27*g/cm3, ncomponents=1,
-                         kStateSolid, 293*kelvin, 1*atmosphere);
-  graphite->AddElement(C, natoms=1);
 
   // example of vacuum
   fWorldMaterial = new G4Material("Galactic", 1, 1.01*g/mole,
@@ -162,15 +146,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   fWorldSizeX     = 4.*fActRadius;
   fWorldSizeYZ    = 4.*fActRadius;
   
-  G4Box*
-  sWorld = new G4Box("World",                                 //name
-              fWorldSizeX,fWorldSizeYZ,fWorldSizeYZ);   //dimensions
-
-  G4LogicalVolume*
-  lWorld = new G4LogicalVolume(sWorld,                  //shape
-                             fWorldMaterial,            //material
-                             "World");                  //name
-
+  G4Box*   sWorld = new G4Box("World",   fWorldSizeX,fWorldSizeYZ,fWorldSizeYZ);  
+  G4LogicalVolume*  lWorld = new G4LogicalVolume(sWorld,  fWorldMaterial,  "World");   
   fWorldVolume = new G4PVPlacement(0,                   //no rotation
                             G4ThreeVector(),            //at (0,0,0)
                             lWorld,                     //logical volume
@@ -178,136 +155,68 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
                             0,                          //mother volume
                             false,                      //no boolean operation
                             0);                         //copy number
-                            
-  // Activator
-  //
-  // G4Box* sAbsor = new G4Box("Absorber",                       //name
-  //       fActThickness/2, c/2, fActRadius/2);   //dimensions
 
-  //①Cap
-  // G4double fActRadius = fActRadius; //42.1*0.5;
-  G4double LengthZrCap = 18.71*mm;
-  G4double thicknessZr = fActThickness; //1.0*mm;
+  G4double radius_LaBr3 = 1.5 * 25.4 * 0.5 *mm; //LaBr3探测器直径
+  G4double thickness_MgO = 0.2*mm; //MgO粉厚度，光反射层。
+  G4double thickness_AlAlloy = 1.5*mm; // 铝合金厚度
+  G4double thickness_ZrCap = 1.5*mm; // 锆帽厚度
 
-  G4Tubs* ZrSideSolid =    
-    new G4Tubs("ZrSideSolid", fActRadius-thicknessZr, fActRadius, LengthZrCap*0.5, 0.0*deg, 360*deg); 
-  G4Tubs* ZrTopSolid =    
-    new G4Tubs("ZrSideSolid", 0., fActRadius, thicknessZr*0.5, 0.0*deg,360*deg); 
-
-  G4ThreeVector translation_Zr = G4ThreeVector(0, 0, LengthZrCap*0.5 + thicknessZr*0.5);
-  G4UnionSolid* ZrSolid = new G4UnionSolid("ZrSolid", ZrSideSolid, ZrTopSolid, 0, translation_Zr);
-  fLActivator = new G4LogicalVolume(ZrSolid,                        //shape
-                                fActiveMaterial,                //material
-                                fActiveMaterial->GetName());    //name
+  //① Zr Cap
+  G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;
+  G4double radius_ZrCap = radius_LaBr3 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap; //1.0*mm;
   G4double posZ1 = LengthZrCap*0.5;
-    new G4PVPlacement(0,                         //no rotation
-                    G4ThreeVector(0.,0.,posZ1),             //at (0,0,0)
-                    fLActivator,                     //logical volume
-                    fActiveMaterial->GetName(),   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
 
-  // Activator2 ,圆锥台
-  G4double LengthActivator2 = 8.35*mm;
-  G4Cons* Activator2 =  new G4Cons("Activator2",26.4*mm, 27.4*mm, fActRadius-thicknessZr, fActRadius, 8.35*mm*0.5, 0.,360.*deg);
-  G4LogicalVolume*
-  lActivator2 = new G4LogicalVolume(Activator2,                  //shape
-                             fActiveMaterial,            //material
-                             "Activator2");                  //name
+  G4Tubs* ZrCup =  new G4Tubs("ZrCup", 0., radius_ZrCap, LengthZrCap*0.5, 0.0*deg, 360*deg); 
+  fLActivator = new G4LogicalVolume(ZrCup, fActiveMaterial, fActiveMaterial->GetName());
+  new G4PVPlacement(0,                         //no rotation
+                  G4ThreeVector(0.,0.,posZ1),             //at (0,0,0)
+                  fLActivator,                     //logical volume
+                  fActiveMaterial->GetName(),   //name
+                  lWorld,                      //mother  volume
+                  false,                       //no boolean operation
+                  0);                          //copy number
 
-  G4double posZ2 = posZ1 - LengthZrCap*0.5 - LengthActivator2*0.5;
-    new G4PVPlacement(0,                         //no rotation
+  // 铝合金外壳
+  G4double LengthAlAlloy = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy;
+  G4double radius_AlAlloy = radius_LaBr3 + thickness_MgO + thickness_AlAlloy; //1.0*mm;
+  G4double posZ2 =  -thickness_ZrCap*0.5;
+  G4Tubs* AlAlloy_Tub =  new G4Tubs("AlAlloy_Tub", 0., radius_AlAlloy, LengthAlAlloy*0.5, 0.0*deg, 360*deg);
+  fLAlAlloy = new G4LogicalVolume(AlAlloy_Tub,  fAlAlloyMaterial,  "AlAlloy");
+  new G4PVPlacement(0,                         //no rotation
                     G4ThreeVector(0.,0.,posZ2),             //at (0,0,0)
-                    lActivator2,                     //logical volume
-                    "Activator2",   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
+                    fLAlAlloy,                     //logical volume
+                    "AlAlloy_phy",   //name
+                    fLActivator,          //mother  volume
+                    false,                     //no boolean operation
+                    0);                           //copy number
 
-  // PMT外部Zr套筒
-  G4double LengthActivator3 = 33.94*mm;
-  G4Tubs* Activator3 =    
-    new G4Tubs("Activator3", 26.4*mm, 27.4*mm, LengthActivator3*0.5, 0.0*deg, 360*deg);
-  G4LogicalVolume*
-  lActivator3 = new G4LogicalVolume(Activator3,                  //shape
-                             fActiveMaterial,            //material
-                             "Activator3");                  //name
-  G4double posZ3 = posZ2 - LengthActivator3*0.5 - LengthActivator2*0.5;
-    new G4PVPlacement(0,                         //no rotation
-                    G4ThreeVector(0.,0.,posZ3),             //at (0,0,0)
-                    lActivator3,                     //logical volume
-                    "Activator3",   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
+  // MgO层
+  G4double LengthMgO = radius_LaBr3 * 2.0 + thickness_MgO;
+  G4double radius_MgO = radius_LaBr3 + thickness_MgO;
+  G4double posZ3 =  - thickness_AlAlloy*0.5;
+  G4Tubs* MgO_Tub = new G4Tubs("MgO_Tub", 0., radius_MgO, LengthMgO*0.5, 0.0*deg, 360*deg);
+  fLMgO = new G4LogicalVolume(MgO_Tub, fMgOMaterial, "fLMgO");
+  new G4PVPlacement(0,                         //no rotation
+                  G4ThreeVector(0.,0.,posZ3),             //at (0,0,0)
+                  fLMgO,                     //logical volume
+                  "MgO_Phys",                //name
+                  fLAlAlloy,                      //mother  volume
+                  false,                       //no boolean operation
+                  0);                          //copy number
 
   // LaBr3
   //
-  G4double LengthLaBr3 = 1.5*25.4*mm;
-  G4Tubs* LaBr3Solid =    
-    new G4Tubs("LaBr3Solid", 0.0, LengthLaBr3*0.5, LengthLaBr3*0.5, 0.0*deg, 360*deg); 
-  fLLaBr3 = new G4LogicalVolume(LaBr3Solid,                        //shape
-                                fLaBr3Material,                //material
-                                fLaBr3Material->GetName());    //name
+  G4double posZLaBr3 = - thickness_MgO*0.5;
+  G4Tubs* LaBr3Solid = new G4Tubs("LaBr3Solid", 0.0, radius_LaBr3, radius_LaBr3, 0.0*deg, 360*deg); 
+  fLLaBr3 = new G4LogicalVolume(LaBr3Solid, fLaBr3Material, fLaBr3Material->GetName());
+  new G4PVPlacement(0,                         //no rotation
+                  G4ThreeVector(0.,0.,posZLaBr3),   //at (0,0,0)
+                  fLLaBr3,                     //logical volume
+                  fLaBr3Material->GetName(),   //name
+                  fLMgO,                      //mother  volume
+                  false,                       //no boolean operation
+                  0);                          //copy number
 
-  G4double posZLaBr3 = posZ1 - 1.0*mm - 0.5*LengthLaBr3 + LengthZrCap*0.5;
-
-    new G4PVPlacement(0,                         //no rotation
-                    G4ThreeVector(0.,0.,posZLaBr3),   //at (0,0,0)
-                    fLLaBr3,                     //logical volume
-                    fLaBr3Material->GetName(),   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
-
-  //PMT
-  //
-  G4double thickPMT = 1.0*mm;
-  G4double LengthPMT = 2.0*25.4*mm;
-  G4Tubs* PMTOuterSolid =    
-    new G4Tubs("PMTOuterSolid", 0.0, LengthPMT*0.5, LengthPMT*0.5, 0.0*deg, 360*deg); 
-  G4Tubs* PMTAirSolid =    
-    new G4Tubs("PMTAirSolid", 0.0, (LengthPMT-thickPMT)*0.5, (LengthPMT-thickPMT)*0.5, 0.0*deg, 360*deg);
-
-  G4SubtractionSolid* PMTSolid =  new G4SubtractionSolid("PMTSolid", PMTOuterSolid, PMTAirSolid);
-  fLPMT = new G4LogicalVolume(PMTSolid,                        //shape
-                              fPMTMaterial,                //material
-                              "PMT");    //name
-
-  G4double posZPMT = posZLaBr3 - LengthLaBr3*0.5 - LengthPMT*0.5;
-    new G4PVPlacement(0,                         //no rotation
-                    G4ThreeVector(0.,0.,posZPMT),   //at (0,0,0)
-                    fLPMT,                     //logical volume
-                    fPMTMaterial->GetName(),   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
-
-  //CH2
-  G4double CapThick = 2.0*mm;
-  G4double LengthCH2 = 30.9*mm - CapThick;
-  G4Tubs* CH2SolidSide =    
-    new G4Tubs("CH2SolidSide", LengthPMT*0.5, 54.8*mm*0.5, LengthCH2*0.5, 0.0*deg, 360*deg); 
-  G4Tubs* CH2SolidCap =    
-    new G4Tubs("CH2SolidCap", 0., 54.8*mm*0.5, 2.0*mm*0.5, 0.0*deg, 360*deg);
-
-  G4ThreeVector translation_CH2 = G4ThreeVector(0, 0, -LengthCH2*0.5 - CapThick*0.5);
-  G4UnionSolid* CH2Solid = new G4UnionSolid("CH2Solid", CH2SolidSide, CH2SolidCap, 0, translation_CH2);
-
-  fLCH2 = new G4LogicalVolume(CH2Solid,                        //shape
-                              fCH2Material,                //material
-                              "CH2");    //name
-
-  G4double posZCH2 = posZ3 - LengthCH2*0.5 - LengthActivator3*0.5;
-    new G4PVPlacement(0,                         //no rotation
-                    G4ThreeVector(0.,0.,posZCH2),   //at (0,0,0)
-                    fLCH2,                     //logical volume
-                    fCH2Material->GetName(),   //name
-                    lWorld,                      //mother  volume
-                    false,                       //no boolean operation
-                    0);                          //copy number
-  
   PrintParameters();
   fScoringVolume = fLLaBr3;
   //always return the root volume

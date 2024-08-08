@@ -10,7 +10,7 @@
 #include "TrackingAction.hh"
 #include "SteppingAction.hh"
 #include "SteppingVerbose.hh"
-
+#include "StackAction.hh"
 //<unistd.h>中的access可以判断文件是否存在，<>中的可以创建文件。
 #include <unistd.h>
 
@@ -74,8 +74,11 @@ void ActionInitialization::Build() const
   
   TrackingAction* trackingAction = new TrackingAction(event);
   SetUserAction(trackingAction);
-  
-  SteppingAction* steppingAction = new SteppingAction(fDetector, event, trackingAction);
+
+  StackAction* stackAct = new StackAction();
+  SetUserAction(stackAct);
+
+  SteppingAction* steppingAction = new SteppingAction(fDetector, event, trackingAction,stackAct);
   SetUserAction(steppingAction);
 }  
 

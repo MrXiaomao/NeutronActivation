@@ -45,17 +45,29 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
   private:
 
+   //中子活化靶,Zr
    G4double           fActThickness = 0.;
    G4double           fActRadius = 0.;
    G4Material*        fActiveMaterial = nullptr;
    G4LogicalVolume*   fLActivator = nullptr;
 
+   // LaBr3探测器
    G4Material*        fLaBr3Material = nullptr;
    G4LogicalVolume*   fLLaBr3 = nullptr;
-   
+
+  // AlAlloy Al合金
+    G4Material*        fAlAlloyMaterial = nullptr;
+   G4LogicalVolume*   fLAlAlloy = nullptr;
+
+  // MgO反射层
+   G4Material*        fMgOMaterial = nullptr;
+   G4LogicalVolume*   fLMgO = nullptr;
+
+   // PMT光电倍增管
    G4Material*        fPMTMaterial = nullptr;
    G4LogicalVolume*   fLPMT = nullptr;
    
+    // 聚乙烯
    G4Material*        fCH2Material = nullptr;
    G4LogicalVolume*   fLCH2 = nullptr;
 

@@ -9,24 +9,30 @@
 #include "G4UserSteppingAction.hh"
 #include "globals.hh"
 #include "G4LogicalVolume.hh"
+#include <map>
 
+class G4ParticleDefinition;
 class DetectorConstruction;
 class EventAction;
 class TrackingAction;
+class StackAction;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class SteppingAction : public G4UserSteppingAction
 {
   public:
-    SteppingAction(DetectorConstruction*,EventAction*,TrackingAction*);
+    SteppingAction(DetectorConstruction*,EventAction*,TrackingAction*,  StackAction*);
    ~SteppingAction();
 
     virtual void UserSteppingAction(const G4Step*);
-    
+    void  CountAndFixedPhysics(const G4Step* aStep);//统计强子核反应以及对部分重要强子反应做修正
+
   private:
+    std::map<G4ParticleDefinition*,G4int> fParticleFlag;    
     DetectorConstruction* fDetector;
     EventAction*         fEventAction;
     TrackingAction*      fTrackAction;
+    StackAction*      fStackAction;
     G4LogicalVolume* fScoringVolume;
 };
 

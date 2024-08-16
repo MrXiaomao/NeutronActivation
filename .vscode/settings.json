@@ -131,6 +131,10 @@
         "event": "cpp",
         "point": "cpp",
         "plot1.C": "cpp",
-        "plotHisto.C": "cpp"
+        "plotHisto.C": "cpp",
+        "xstring": "cpp",
+        "xtree": "cpp",
+        "xutility": "cpp",
+        "xmemory": "cpp"
     }
 }

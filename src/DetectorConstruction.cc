@@ -159,7 +159,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double radius_LaBr3 = 1.5 * 25.4 * 0.5 *mm; //LaBr3探测器直径
   G4double thickness_MgO = 0.2*mm; //MgO粉厚度，光反射层。
   G4double thickness_AlAlloy = 1.5*mm; // 铝合金厚度
-  G4double thickness_ZrCap = 1.5*mm; // 锆帽厚度
+  G4double thickness_ZrCap = fActThickness; // 锆帽厚度
 
   //① Zr Cap
   G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;

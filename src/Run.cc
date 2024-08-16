@@ -353,29 +353,44 @@ void Run::EndOfRun()
   //按照key进行排序，升序
   // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//利用vector容器储存后再进行排序。 
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
+  
+  //转化为mm为单位的数值
+  G4double Zrthickness = fDetector->GetAbsorThickness()/CLHEP::mm;
+  G4int NumberEvent = GetNumberOfEventToBeProcessed();
+  // 生成以变参数为后缀的文件名
+	std::ostringstream os;
+	os << "EnergyDep";
+	os << Zrthickness;
+  os << "_";
+  os << NumberEvent;
+	os << ".h5" ;
+	G4String fileName = os.str();
+  // 若存在旧文件，则先删除
+  G4String outPutPath = "../OutPut/";
+  G4String wholepath = outPutPath + fileName;
+  if (remove(wholepath) != 0) { // 尝试删除文件
+    G4cout << wholepath <<" is not exist." << G4endl;
+  } else {
+    G4cout << wholepath <<" is deleted successfully." << G4endl;
+  }
 
   Hdf5WriteValue write;
 
   // 将各个核素的衰变事件中能量沉积数据输出
-  G4String outPutPath = "../OutPut/";
-  // G4String fileName;
   // fstream datafile;
   for ( const auto& oneIroEdep : fIronSpectrum ) {
     vector<G4double> energyEdp = oneIroEdep.second;
-    // fileName = outPutPath + oneIroEdep.first + ".Spectrum";
-
     //将数据写入HDF5
     int size = energyEdp.size();
     if(size>0){
-      write.CreateNewFile("../OutPut/EnergyDep.h5");
+      write.CreateNewFile(wholepath); //"../OutPut/EnergyDep.h5"
       write.CreateGroup("groupA");
       write.CreateDataspace(1, 1, size);  //秩，列，行
       write.CreateDoubleDataset(oneIroEdep.first);
       write.WriteDoubleValue(energyEdp.data());
       write.CloseFile();
     }
-    // G4cout<<" fileName = "<<fileName<<G4endl;
-    /*datafile.open(fileName, ios::out|ios::ate);
+    /*datafile.open(wholepath, ios::out|ios::ate);
     if (!datafile.fail())
     {
       for(vector<G4double>::iterator iter = energyEdp.begin(); iter != energyEdp.end(); iter++)
@@ -385,14 +400,22 @@ void Run::EndOfRun()
     }
     datafile.close();*/
   }
-  
+  // 生成以变参数为后缀的文件名
+	std::ostringstream os2;
+	os2 << "TimeEdep";
+	os2 << Zrthickness;
+  os2 << "_";
+  os2 << NumberEvent;
+	os2 << ".h5" ;
+	G4String fileName2 = os2.str();
+  G4String wholepath2 = outPutPath + fileName2;
   // 输出各个粒子径迹的沉积能量和沉积时刻
   //
   vector<G4double> energyVec;
   vector<G4double> timeVec;
   // 将文件写入HDF5
   Hdf5WriteValue write2;
-  write2.CreateNewFile("../OutPut/TimeEdep.h5");
+  write2.CreateNewFile(wholepath2);//"../OutPut/TimeEdep.h5"
   write2.CreateGroup("Data");
   // vector<G4double> edep_timeVec;
   /*

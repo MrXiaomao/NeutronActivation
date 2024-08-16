@@ -49,12 +49,10 @@ target_link_libraries(Activation ${Geant4_LIBRARIES} -lstdc++fs ${HDF5_CXX_LIBRA
 # relies on these scripts being in the current working directory.
 #
 set(Activation_SCRIPTS
-    Bi209.mac
-    Co60.mac
-    debug.mac
+    loop.mac
+    detector.mac
     envHadronic.csh
     envHadronic.sh
-    Activation.in
     run.mac
     vis.mac
     init_vis.mac

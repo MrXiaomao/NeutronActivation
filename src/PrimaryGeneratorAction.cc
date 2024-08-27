@@ -37,11 +37,11 @@ PrimaryGeneratorAction::~PrimaryGeneratorAction()
 void PrimaryGeneratorAction::SetDefaultKinematic()
 {
   G4ParticleDefinition* particle
-           = G4ParticleTable::GetParticleTable()->FindParticle("proton");
+           = G4ParticleTable::GetParticleTable()->FindParticle("neutron");
   fParticleGun->SetParticleDefinition(particle);
-  fParticleGun->SetParticleEnergy(10*MeV);  
+  fParticleGun->SetParticleEnergy(14*MeV);  
   fParticleGun->SetParticleMomentumDirection(G4ThreeVector(1.,0.,0.));
-  G4double position = -0.45*(fDetector->GetWorldSizeX());
+  G4double position = -0.45*(fDetector->GetWorldSizeXY());
   fParticleGun->SetParticlePosition(G4ThreeVector(position,0.*cm,0.*cm));
 }
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

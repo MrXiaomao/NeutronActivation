@@ -38,8 +38,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
 
-   G4double GetWorldSizeX()   {return fWorldSizeX;};
-   G4double GetWorldSizeYZ()  {return fWorldSizeYZ;};
+   G4double GetWorldSizeXY()   {return fWorldSizeXY;};
+   G4double GetWorldSizeZ()  {return fWorldSizeZ;};
 
    void PrintParameters();
 
@@ -71,8 +71,8 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    G4Material*        fCH2Material = nullptr;
    G4LogicalVolume*   fLCH2 = nullptr;
 
-   G4double           fWorldSizeX = 0.;
-   G4double           fWorldSizeYZ = 0.;
+   G4double           fWorldSizeXY = 0.;
+   G4double           fWorldSizeZ = 0.;
    G4Material*        fWorldMaterial = nullptr;
    G4VPhysicalVolume* fWorldVolume = nullptr;                        
 

@@ -135,6 +135,8 @@
         "xstring": "cpp",
         "xtree": "cpp",
         "xutility": "cpp",
-        "xmemory": "cpp"
+        "xmemory": "cpp",
+        "xiosbase": "cpp",
+        "ios": "cpp"
     }
 }

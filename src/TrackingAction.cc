@@ -72,15 +72,17 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
   // count population of ions with meanLife > 0.
   if ((G4IonTable::IsIon(particle))&&(meanLife != 0.)) {
     G4int id = run->GetIonId(name);
-    G4double unit = analysis->GetH1Unit(id);
-    G4double tmin = analysis->GetH1Xmin(id)*unit;
-    G4double tmax = analysis->GetH1Xmax(id)*unit;
-    G4double binWidth = analysis->GetH1Width(id)*unit;
+    if(id<254) {
+      G4double unit = analysis->GetH1Unit(id);
+      G4double tmin = analysis->GetH1Xmin(id)*unit;
+      G4double tmax = analysis->GetH1Xmax(id)*unit;
+      G4double binWidth = analysis->GetH1Width(id)*unit;
 
-    G4double t1 = std::max(fTimeBirth,tmin);
-    G4double t2 = std::min(fTimeEnd  ,tmax);
-    for (G4double time = t1; time<t2; time+= binWidth)
-       analysis->FillH1(id,time);
+      G4double t1 = std::max(fTimeBirth,tmin);
+      G4double t2 = std::min(fTimeEnd  ,tmax);
+      for (G4double time = t1; time<t2; time+= binWidth)
+         analysis->FillH1(id,time);
+    }
   }
 
   run->ParticleFlux(name,ekin);

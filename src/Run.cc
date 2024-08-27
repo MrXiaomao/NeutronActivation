@@ -561,6 +561,10 @@ void Run::EndOfRun()
   fParticleDataMap1.clear();
   fParticleDataMap2.clear();
   fgIonMap.clear();
+
+  fIronSpectrum.clear();
+  fTrackTime_dep.clear();
+  fEventTime_edep.clear();
                           
   //restore default format         
   G4cout.precision(dfprec);   

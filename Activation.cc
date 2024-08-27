@@ -42,8 +42,8 @@
 #include "Randomize.hh"
 
 #include "DetectorConstruction.hh"
-#include "PhysicsList.hh"
-// #include "QGSP_BERT_HP.hh"
+// #include "PhysicsList.hh"
+#include "QGSP_BERT_HP.hh"
 #include "ActionInitialization.hh"
 #include "SteppingVerbose.hh"
 
@@ -78,8 +78,8 @@ int main(int argc,char** argv) {
   DetectorConstruction* det= new DetectorConstruction;
   runManager->SetUserInitialization(det);
   
-  PhysicsList* phys = new PhysicsList;
-  // G4VUserPhysicsList* phys = new QGSP_BERT_HP;
+  // PhysicsList* phys = new PhysicsList;
+  G4VUserPhysicsList* phys = new QGSP_BERT_HP;
   runManager->SetUserInitialization(phys);
   
   runManager->SetUserInitialization(new ActionInitialization(det));    

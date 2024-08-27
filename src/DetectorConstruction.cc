@@ -21,6 +21,7 @@
 #include "G4SystemOfUnits.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4UnitsTable.hh"
+#include "G4RotationMatrix.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -30,8 +31,8 @@ DetectorConstruction::DetectorConstruction():
   // default geometrical parameters
   fActThickness = 1*mm;
   fActRadius    = 1.905*cm;
-  fWorldSizeX   = 2.*fActThickness;
-  fWorldSizeYZ  = 2.*fActRadius;
+  fWorldSizeXY   = 2.*fActThickness;
+  fWorldSizeZ  = 2.*fActRadius;
 
   // materials
   DefineMaterials();
@@ -143,10 +144,10 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
 
   // World
   //
-  fWorldSizeX     = 4.*fActRadius;
-  fWorldSizeYZ    = 4.*fActRadius;
+  fWorldSizeXY     = 20.0*cm;
+  fWorldSizeZ    = 20.0*cm;
   
-  G4Box*   sWorld = new G4Box("World",   fWorldSizeX,fWorldSizeYZ,fWorldSizeYZ);  
+  G4Box*   sWorld = new G4Box("World",   fWorldSizeXY, fWorldSizeXY, fWorldSizeZ);  
   G4LogicalVolume*  lWorld = new G4LogicalVolume(sWorld,  fWorldMaterial,  "World");   
   fWorldVolume = new G4PVPlacement(0,                   //no rotation
                             G4ThreeVector(),            //at (0,0,0)
@@ -165,10 +166,12 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;
   G4double radius_ZrCap = radius_LaBr3 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap; //1.0*mm;
   G4double posZ1 = LengthZrCap*0.5;
-
+  
+  G4RotationMatrix* rm = new G4RotationMatrix();
+    rm->rotateX(0.*degree);
   G4Tubs* ZrCup =  new G4Tubs("ZrCup", 0., radius_ZrCap, LengthZrCap*0.5, 0.0*deg, 360*deg); 
   fLActivator = new G4LogicalVolume(ZrCup, fActiveMaterial, fActiveMaterial->GetName());
-  new G4PVPlacement(0,                         //no rotation
+  new G4PVPlacement(rm,                         //no rotation
                   G4ThreeVector(0.,0.,posZ1),             //at (0,0,0)
                   fLActivator,                     //logical volume
                   fActiveMaterial->GetName(),   //name

@@ -357,6 +357,13 @@ void Run::EndOfRun()
   //转化为mm为单位的数值
   G4double Zrthickness = fDetector->GetAbsorThickness()/CLHEP::mm;
   G4int NumberEvent = GetNumberOfEventToBeProcessed();
+
+  std::ostringstream os1;
+  os1 << "../OutPut";
+	os1 << fDetector->GetZrRotate();
+  os1 << "/";
+  G4String outPutPath = os1.str();
+
   // 生成以变参数为后缀的文件名
 	std::ostringstream os;
 	os << "EnergyDep";
@@ -366,7 +373,7 @@ void Run::EndOfRun()
 	os << ".h5" ;
 	G4String fileName = os.str();
   // 若存在旧文件，则先删除
-  G4String outPutPath = "../OutPut/";
+  // G4String outPutPath = "../OutPut/";
   G4String wholepath = outPutPath + fileName;
   if (remove(wholepath) != 0) { // 尝试删除文件
     G4cout << wholepath <<" is not exist." << G4endl;

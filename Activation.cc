@@ -58,6 +58,13 @@ int main(int argc,char** argv) {
   if ( argc == 1 ) {
     ui = new G4UIExecutive(argc, argv);
   }
+  
+  G4String macro  = "nothing";
+  G4double ratote = 0.0; //锆帽旋转角度
+  for ( G4int i=1; i<argc; i=i+2 ) {
+    if      ( G4String(argv[i]) == "-m" ) macro   = argv[i+1];
+    else if ( G4String(argv[i]) == "-Rotate" ) ratote = atof(argv[i+1]);
+  }
 
   //choose the Random engine
   G4Random::setTheEngine(new CLHEP::RanecuEngine);
@@ -75,7 +82,7 @@ int main(int argc,char** argv) {
 #endif
 
   // set mandatory initialization classes
-  DetectorConstruction* det= new DetectorConstruction;
+  DetectorConstruction* det= new DetectorConstruction(ratote);
   runManager->SetUserInitialization(det);
   
   // PhysicsList* phys = new PhysicsList;
@@ -92,13 +99,11 @@ int main(int argc,char** argv) {
   // get the pointer to the User Interface manager 
   G4UImanager* UI = G4UImanager::GetUIpointer();  
 
-  if (argc!=1)   // batch mode  
-    {
-     G4String command = "/control/execute ";
-     G4String fileName = argv[1];
-     UI->ApplyCommand(command+fileName);
-    }
-    
+  if (macro!= "nothing")   // batch mode  
+  {
+    G4String command = "/control/execute ";
+    UI->ApplyCommand(command+macro);
+  }
   else           //define visualization and UI terminal for interactive mode
     { 
       // interactive mode

@@ -5,6 +5,7 @@
 
 #include "ActionInitialization.hh"
 #include "PrimaryGeneratorAction.hh"
+#include "DetectorConstruction.hh"
 #include "RunAction.hh"
 #include "EventAction.hh"
 #include "TrackingAction.hh"
@@ -36,12 +37,17 @@ ActionInitialization::~ActionInitialization()
 
 void ActionInitialization::BuildForMaster() const
 {
+  std::ostringstream os;
+  os << "../OutPut";
+	os << fDetector->GetZrRotate();
+  os << "/";
+  G4String path = os.str();
   // 清除历史输出文件
-  const char *path = "../OutPut/";
-  G4String G4path = path;
+  // const char *path = "../OutPut/";
+  // G4String G4path = path;
   //判断文件夹是否存在，不存在则创建
   if (access(path, 0) == -1){   //如果文件夹不存在
-    mkdir(G4path,0777);
+    mkdir(path,0777);
   }
   /*else{
     // 删除目录中的所有内容

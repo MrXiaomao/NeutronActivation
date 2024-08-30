@@ -1,0 +1,23 @@
+./Activation -Rotate 90 -m run5.mac
+./Activation -Rotate 90 -m run10.mac
+./Activation -Rotate 90 -m run15.mac
+./Activation -Rotate 90 -m run20.mac
+./Activation -Rotate 90 -m run25.mac
+./Activation -Rotate 90 -m run30.mac
+./Activation -Rotate 90 -m run35.mac
+./Activation -Rotate 90 -m run40.mac
+./Activation -Rotate 90 -m run50.mac
+./Activation -Rotate 90 -m run60.mac
+./Activation -Rotate 90 -m run70.mac
+
+./Activation -Rotate 0 -m run5.mac
+./Activation -Rotate 0 -m run10.mac
+./Activation -Rotate 0 -m run15.mac
+./Activation -Rotate 0 -m run20.mac
+./Activation -Rotate 0 -m run25.mac
+./Activation -Rotate 0 -m run30.mac
+./Activation -Rotate 0 -m run35.mac
+./Activation -Rotate 0 -m run40.mac
+./Activation -Rotate 0 -m run50.mac
+./Activation -Rotate 0 -m run60.mac
+./Activation -Rotate 0 -m run70.mac

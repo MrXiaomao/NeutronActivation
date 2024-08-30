@@ -25,7 +25,8 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-DetectorConstruction::DetectorConstruction():
+DetectorConstruction::DetectorConstruction(G4double r):
+  fZrRotate(r),
   fScoringVolume(0)
 {
   // default geometrical parameters
@@ -168,7 +169,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double posZ1 = LengthZrCap*0.5;
   
   G4RotationMatrix* rm = new G4RotationMatrix();
-    rm->rotateX(0.*degree);
+    rm->rotateX(fZrRotate*degree);
   G4Tubs* ZrCup =  new G4Tubs("ZrCup", 0., radius_ZrCap, LengthZrCap*0.5, 0.0*deg, 360*deg); 
   fLActivator = new G4LogicalVolume(ZrCup, fActiveMaterial, fActiveMaterial->GetName());
   new G4PVPlacement(rm,                         //no rotation

@@ -20,9 +20,9 @@ using namespace myConsts;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 // 中子能量,MeV 
-G4double en_2n_Zr90[9] =      {12.5, 13.5, 14.0, 14.8, 15.3, 16.3, 17.8, 18.1, 19.3, 19.4, 19.9, 20.6};
+G4double en_2n_Zr90[13] =      {12.5, 13.5, 14.0, 14.5, 14.8, 15.3, 16.3, 17.8, 18.1, 19.3, 19.4, 19.9, 20.6};
 // 反应道激发态截面占比, Zr90(n,2n)Zr89m
-G4double cs_2nration_Zr89m[9] = {0.0, 0.07, 0.12, 0.19, 0.21, 0.20, 0.19, 0.21, 0.19, 0.19, 0.17, 0.17};
+G4double cs_2nration_Zr89m[13] = {0.0, 0.07, 0.12, 0.16, 0.19, 0.21, 0.20, 0.19, 0.21, 0.19, 0.19, 0.17, 0.17};
 
 // 中子能量,MeV 
 G4double en_2n_Ce140[8] = {13.47, 13.64, 13.88, 14.05, 14.28, 14.47, 14.68, 14.86};
@@ -210,13 +210,13 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
         // 根据能量线性插值给出激发态比例
         G4double neutronEnergy = aStep->GetPreStepPoint()->GetKineticEnergy();
         G4double ratio = 0.0;
-        for(int i=0; i<9; i++){
+        for(int i=0; i<13; i++){
           if(neutronEnergy <= en_2n_Zr90[0]) {
             ratio = cs_2nration_Zr89m[0];
             break;
           }
-          if(neutronEnergy >= en_2n_Zr90[8]){
-            ratio = cs_2nration_Zr89m[8];
+          if(neutronEnergy >= en_2n_Zr90[12]){
+            ratio = cs_2nration_Zr89m[12];
             break;
           }
           if(neutronEnergy <= en_2n_Zr90[i]){

@@ -16,7 +16,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
 
-    DetectorConstruction();
+    DetectorConstruction(G4double);
    ~DetectorConstruction() override;
 
   public:
@@ -33,6 +33,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
   public:  
 
    G4double GetAbsorThickness()    {return fActThickness;};
+   G4double GetZrRotate()    {return fZrRotate;};
    G4double GetAbsorSizeYZ()       {return fActRadius;};
    G4Material* GetAbsorMaterial()  {return fActiveMaterial;};
 
@@ -48,6 +49,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    //中子活化靶,Zr
    G4double           fActThickness = 0.;
    G4double           fActRadius = 0.;
+   G4double           fZrRotate = 0.0; //锆帽旋转角度
    G4Material*        fActiveMaterial = nullptr;
    G4LogicalVolume*   fLActivator = nullptr;
 

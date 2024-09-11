@@ -1,4 +1,3 @@
-// $Id: SteppingAction.cc 71404 2013-06-14 16:56:38Z maire $
 // 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -13,7 +12,7 @@
 #include "G4HadronicProcess.hh"
 #include "G4ParticleTable.hh"
 #include "G4IonTable.hh"
-
+#include "G4RunManagerFactory.hh"
 #include "G4RunManager.hh"
 
 #include <mutex>
@@ -23,20 +22,20 @@ mutex dataFile_lock;
 using namespace myConsts;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// ä¸­å­èƒ½é‡,MeV 
+// ÖĞ×ÓÄÜÁ¿,MeV 
 G4double en_2n_Zr90[13] =      {12.5, 13.5, 14.0, 14.5, 14.8, 15.3, 16.3, 17.8, 18.1, 19.3, 19.4, 19.9, 20.6};
-// ååº”é“æ¿€å‘æ€æˆªé¢å æ¯”, Zr90(n,2n)Zr89m
+// ·´Ó¦µÀ¼¤·¢Ì¬½ØÃæÕ¼±È, Zr90(n,2n)Zr89m
 G4double cs_2nration_Zr89m[13] = {0.0, 0.07, 0.12, 0.16, 0.19, 0.21, 0.20, 0.19, 0.21, 0.19, 0.19, 0.17, 0.17};
 
-// ä¸­å­èƒ½é‡,MeV 
+// ÖĞ×ÓÄÜÁ¿,MeV 
 G4double en_2n_Ce140[8] = {13.47, 13.64, 13.88, 14.05, 14.28, 14.47, 14.68, 14.86};
-// ååº”é“æ¿€å‘æ€æˆªé¢, Ce140(n,2n)Ce139m
+// ·´Ó¦µÀ¼¤·¢Ì¬½ØÃæ, Ce140(n,2n)Ce139m
 G4double cs_2nRatio_Ce139m[8] = {0.451150157, 0.500972384, 0.483178654, 0.44856661, 0.456, 
                                 0.482989403, 0.528856826, 0.598006645};
 
-// ä¸­å­èƒ½é‡,MeV 
+// ÖĞ×ÓÄÜÁ¿,MeV 
 G4double en_np_Y89[4] = {13.5, 14.0, 14.5, 15.0};
-// ååº”é“æ¿€å‘æ€æˆªé¢ï¼ŒZr90(n,np)Y89m
+// ·´Ó¦µÀ¼¤·¢Ì¬½ØÃæ£¬Zr90(n,np)Y89m
 G4double cs_npRatio_Y89m[4] = {0.237, 0.314, 0.427, 0.424};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -45,7 +44,7 @@ G4String SteppingAction::fileWholePath = "data.txt";
 SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* event,TrackingAction* track, StackAction* stack)
 : G4UserSteppingAction(), 
 fDetector(det), fEventAction(event),fTrackAction(track),fStackAction(stack),
-fScoringVolume(0),
+fScoringVolume(nullptr),
 lasttime(0.0),lastedep(0.0)
 { }
 
@@ -71,9 +70,9 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     fScoringVolume = fDetector->GetScoringVolume();   
   }
   
-  //å†™å…¥æœ€æ–°çš„è¡°å˜æ—¶é—´
+  //Ğ´Èë×îĞÂµÄË¥±äÊ±¼ä
   G4double decayTime = aStep->GetPostStepPoint()->GetGlobalTime();
-  //éœ€è¦æ³¨æ„ï¼Œä¸åŒç‰ˆæœ¬çš„G4,è¿™ä¸ªè¡°å˜å…³é”®å­—ä¸ä¸€æ ·ï¼Œæœ‰RadioactiveDecayï¼ŒRadioactiveDecayBaseä¸¤ç§
+  //ĞèÒª×¢Òâ£¬²»Í¬°æ±¾µÄG4,Õâ¸öË¥±ä¹Ø¼ü×Ö²»Ò»Ñù£¬ÓĞRadioactiveDecay£¬RadioactiveDecayBaseÁ½ÖÖ
   if(process->GetProcessName() == "RadioactiveDecayBase") {
     fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),decayTime);
   }
@@ -85,7 +84,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   if(volume != fScoringVolume) return;
 
-  //æ‰“å°ä¸Šä¸€æ¬¡Eventæœ€åä¸€ä¸ªTrackæ²¡æœ‰æ”¶é›†çš„æ•°æ®
+  //´òÓ¡ÉÏÒ»´ÎEvent×îºóÒ»¸öTrackÃ»ÓĞÊÕ¼¯µÄÊı¾İ
   G4String volumepre;
   G4Track* theTrack = aStep->GetTrack(); 
   if (theTrack->GetTrackID() == 1) volumepre="primary";
@@ -131,7 +130,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   fEventAction->AddEdep(edepStep);
   fTrackAction->AddTrackEdep(edepStep);
-  //åªç»Ÿè®¡è¡°å˜ä¹‹ç±»çš„æ”¾å°„æ€§ï¼Œå› æ­¤è¿™é‡ŒæŠŠçŸ­æ—¶é—´éƒ½ä¸åšç»Ÿè®¡
+  //Ö»Í³¼ÆË¥±äÖ®ÀàµÄ·ÅÉäĞÔ£¬Òò´ËÕâÀï°Ñ¶ÌÊ±¼ä¶¼²»×öÍ³¼Æ
   if(decayTime>gGountBeginTime){
     fEventAction->AddTimeEdep(edepStep,decayTime);
   }
@@ -181,7 +180,7 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
   G4HadronicProcess* hproc = dynamic_cast<G4HadronicProcess*>(process);
   const G4Isotope* target = NULL;
   
-  //å½“ä¸å­˜åœ¨å¼ºå­æ ¸ååº”è¿‡ç¨‹ï¼Œåˆ™ç›´æ¥è·³è¿‡
+  //µ±²»´æÔÚÇ¿×ÓºË·´Ó¦¹ı³Ì£¬ÔòÖ±½ÓÌø¹ı
   if (hproc) target = hproc->GetTargetIsotope();
   else return;
 
@@ -242,11 +241,11 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
     //Zr90(n,2n)Zr89
   if(oldChannel.find("2 neutron") != G4String::npos && (targetName == "Zr90"))
     {
-        //æŠ½æ ·å†³å®šäº§ç”ŸåŸºæ€å’Œæ¿€å‘æ€ä¸¤ç§ç²’å­
+        //³éÑù¾ö¶¨²úÉú»ùÌ¬ºÍ¼¤·¢Ì¬Á½ÖÖÁ£×Ó
         G4double trial = G4UniformRand(); 
         G4double exiEnergy = 0.0;
 
-        // æ ¹æ®èƒ½é‡çº¿æ€§æ’å€¼ç»™å‡ºæ¿€å‘æ€æ¯”ä¾‹
+        // ¸ù¾İÄÜÁ¿ÏßĞÔ²åÖµ¸ø³ö¼¤·¢Ì¬±ÈÀı
         G4double neutronEnergy = aStep->GetPreStepPoint()->GetKineticEnergy();
         G4double ratio = 0.0;
         for(int i=0; i<13; i++){
@@ -266,7 +265,7 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
           }
         }
 
-        //æŠ½æ ·ç»™å‡ºåŸºæ€/æ¿€å‘æ€çš„ååº”é“
+        //³éÑù¸ø³ö»ùÌ¬/¼¤·¢Ì¬µÄ·´Ó¦µÀ
         if(trial<ratio) {
           exiEnergy = 587.82*CLHEP::keV;
           if(oldChannel.find("2 neutron + N gamma or e-") != G4String::npos){
@@ -285,9 +284,9 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
           }
         }
         oldChannel = "new: " + oldChannel;
-        // run->CountNuclearChannel(oldChannel, Q); //æ–°å¢ä¸€ä¸ªç»Ÿè®¡Zr89[587.82]
+        // run->CountNuclearChannel(oldChannel, Q); //ĞÂÔöÒ»¸öÍ³¼ÆZr89[587.82]
 
-        //äº§ç”Ÿæ–°çš„ç²’å­
+        //²úÉúĞÂµÄÁ£×Ó
         G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(40, 89, exiEnergy);
         
         G4String name     = ion->GetParticleName();
@@ -307,11 +306,11 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
     //Ce140(n,2n)Ce139
   if(nuclearChannel.find("2 neutron") != G4String::npos && (targetName == "Ce140"))
     {
-        //æŠ½æ ·å†³å®šäº§ç”ŸåŸºæ€å’Œæ¿€å‘æ€ä¸¤ç§ç²’å­
+        //³éÑù¾ö¶¨²úÉú»ùÌ¬ºÍ¼¤·¢Ì¬Á½ÖÖÁ£×Ó
         G4double trial = G4UniformRand(); 
         G4double exiEnergy = 0.0;
 
-        // æ ¹æ®èƒ½é‡çº¿æ€§æ’å€¼ç»™å‡ºæ¿€å‘æ€æ¯”ä¾‹
+        // ¸ù¾İÄÜÁ¿ÏßĞÔ²åÖµ¸ø³ö¼¤·¢Ì¬±ÈÀı
         G4double neutronEnergy = aStep->GetPreStepPoint()->GetKineticEnergy();
         G4double ratio = 0.0;
         for(int i=0; i<8; i++){
@@ -331,10 +330,10 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
           }
         }
 
-        //æŠ½æ ·ç»™å‡ºåŸºæ€/æ¿€å‘æ€çš„ååº”é“
+        //³éÑù¸ø³ö»ùÌ¬/¼¤·¢Ì¬µÄ·´Ó¦µÀ
         if(trial<ratio) {
           exiEnergy = 754.24*CLHEP::keV;
-          // å¿…é¡»å…ˆåˆ¤æ–­å¸¦N gamma or e-çš„ï¼Œå†åˆ¤æ–­ä¸å¸¦çš„
+          // ±ØĞëÏÈÅĞ¶Ï´øN gamma or e-µÄ£¬ÔÙÅĞ¶Ï²»´øµÄ
           if(oldChannel.find("2 neutron + N gamma or e-") != G4String::npos){
               oldChannel.replace(oldChannel.find("or e-"), 5, "or e- + Ce139[754.24]");
           }
@@ -351,7 +350,7 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
           }
         }
         oldChannel = "new: " + oldChannel;
-        // run->CountNuclearChannel(oldChannel, Q); //æ–°å¢ä¸€ä¸ªç»Ÿè®¡Ce139[754.24]
+        // run->CountNuclearChannel(oldChannel, Q); //ĞÂÔöÒ»¸öÍ³¼ÆCe139[754.24]
 
         G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(58, 139, exiEnergy);
         G4String name = ion->GetParticleName();
@@ -359,7 +358,7 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
         run->ParticleCount(name, 1.0*CLHEP::keV, meanLife);
 
         G4ThreeVector momentumDirection = aStep->GetPreStepPoint()->GetMomentumDirection();
-        G4double kineticEnergy = 0.01*CLHEP::keV;  //è¿™é‡ŒåŠ¨èƒ½ä¸å½±å“ç²’å­è¡°å˜ï¼Œä½†æ˜¯éœ€è¦å¤§äºé›¶ç¡®ä¿å®ƒèƒ½ç»§ç»­è¿åŠ¨ä¸‹å»ï¼Œå¦å¤–ä¸èƒ½å¤ªå¤§ï¼Œå¦åˆ™ä¼šå‡ºç°å¤šä½™èƒ½é‡æ²‰ç§¯
+        G4double kineticEnergy = 0.01*CLHEP::keV;  //ÕâÀï¶¯ÄÜ²»Ó°ÏìÁ£×ÓË¥±ä£¬µ«ÊÇĞèÒª´óÓÚÁãÈ·±£ËüÄÜ¼ÌĞøÔË¶¯ÏÂÈ¥£¬ÁíÍâ²»ÄÜÌ«´ó£¬·ñÔò»á³öÏÖ¶àÓàÄÜÁ¿³Á»ı
         G4DynamicParticle* const residualNucleus = new G4DynamicParticle(ion, momentumDirection,  kineticEnergy);
         G4double time = aStep->GetTrack()->GetGlobalTime();
         G4ThreeVector currentPosition = aStep->GetPreStepPoint()->GetPosition();
@@ -372,11 +371,11 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
     //Zr90(n,np)Y89m
   if(nuclearChannel.find("proton + neutron") != G4String::npos && (targetName == "Zr90"))
     {
-        //æŠ½æ ·å†³å®šäº§ç”ŸåŸºæ€å’Œæ¿€å‘æ€ä¸¤ç§ç²’å­
+        //³éÑù¾ö¶¨²úÉú»ùÌ¬ºÍ¼¤·¢Ì¬Á½ÖÖÁ£×Ó
         G4double trial = G4UniformRand();
         G4double exiEnergy = 0.0;
 
-        // æ ¹æ®èƒ½é‡çº¿æ€§æ’å€¼ç»™å‡ºæ¿€å‘æ€æ¯”ä¾‹
+        // ¸ù¾İÄÜÁ¿ÏßĞÔ²åÖµ¸ø³ö¼¤·¢Ì¬±ÈÀı
         G4double neutronEnergy = aStep->GetPreStepPoint()->GetKineticEnergy();
         G4double ratio = 0.0;
         for(int i=0; i<4; i++){
@@ -415,7 +414,7 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
         }
 
         oldChannel = "new: " + oldChannel;
-        // run->CountNuclearChannel(oldChannel, Q); //æ–°å¢ä¸€ä¸ªç»Ÿè®¡Y89[908.97]
+        // run->CountNuclearChannel(oldChannel, Q); //ĞÂÔöÒ»¸öÍ³¼ÆY89[908.97]
 
         G4ParticleDefinition* ion = G4IonTable::GetIonTable()->GetIon(39, 89, exiEnergy);
         G4String name     = ion->GetParticleName();
@@ -445,11 +444,11 @@ void  SteppingAction::GeneratedataFileName(DetectorConstruction* det)
   os1 << "/";
   G4String outPutPath = os1.str();
 
-  //è½¬åŒ–ä¸ºmmä¸ºå•ä½çš„æ•°å€¼
+  //×ª»¯ÎªmmÎªµ¥Î»µÄÊıÖµ
   G4double Zrthickness = det->GetActThickness()/CLHEP::mm;
-  G4int NumberEvent = G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed();
+  G4int NumberEvent = G4RunManagerFactory::GetMasterRunManager()->GetNumberOfEventsToBeProcessed();
 
-  // ç”Ÿæˆä»¥å˜å‚æ•°ä¸ºåç¼€çš„æ–‡ä»¶å
+  // Éú³ÉÒÔ±ä²ÎÊıÎªºó×ºµÄÎÄ¼şÃû
 	std::ostringstream os;
 	os << "data";
 	os << Zrthickness;
@@ -457,10 +456,10 @@ void  SteppingAction::GeneratedataFileName(DetectorConstruction* det)
   os << NumberEvent;
 	os << ".txt" ;
 	G4String fileName = os.str();
-  // è‹¥å­˜åœ¨æ—§æ–‡ä»¶ï¼Œåˆ™å…ˆåˆ é™¤
+  // Èô´æÔÚ¾ÉÎÄ¼ş£¬ÔòÏÈÉ¾³ı
   // G4String outPutPath = "../OutPut/";
   G4String wholepath = outPutPath + fileName;
-  if (remove(wholepath) != 0) { // å°è¯•åˆ é™¤æ–‡ä»¶
+  if (remove(wholepath) != 0) { // ³¢ÊÔÉ¾³ıÎÄ¼ş
     G4cout << wholepath <<" is not exist." << G4endl;
   } else {
     G4cout << wholepath <<" is deleted successfully." << G4endl;

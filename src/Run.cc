@@ -78,12 +78,12 @@ void Run::Merge(std::map<G4String, vector<G4double>>& destinationMap,
   {
     std::map<G4String, vector<G4double>>::iterator it = destinationMap.find(itc->first);
 
-    //å¦‚æœæ˜¯æ–°çš„æ ¸ç´ ï¼Œæ˜¯åˆ™æ–°å¢ï¼Œå¦åˆ™åˆå¹¶åˆ°åŒä¸€æ ¸ç´ ä¸­
+    //Èç¹ûÊÇĞÂµÄºËËØ£¬ÊÇÔòĞÂÔö£¬·ñÔòºÏ²¢µ½Í¬Ò»ºËËØÖĞ
     if ( it == fIronSpectrum.end()) {
       destinationMap[itc->first] = itc->second;
     }
     else{
-      // åˆå¹¶ä¸¤ä¸ªå®¹å™¨
+      // ºÏ²¢Á½¸öÈİÆ÷
       destinationMap[itc->first].insert(destinationMap[itc->first].end(),itc->second.begin(),itc->second.end());
     }
   }
@@ -94,7 +94,7 @@ void Run::Merge(std::map<G4String, vector<G4double>>& destinationMap,
 void Run::Merge(vector<TimeEdep>& destinationEdep,
                 const vector<TimeEdep>& sourceEdep) const
 {
-  //å®¹å™¨æ‹¼æ¥
+  //ÈİÆ÷Æ´½Ó
   destinationEdep.insert(destinationEdep.end(),sourceEdep.begin(),sourceEdep.end());
 }
 
@@ -145,13 +145,13 @@ void Run::ParticleCount(G4String name, G4double Ekin, G4double meanLife)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// æ”¶é›†å•ä¸ªå¾„è¿¹åœ¨æ™¶ä½“ä¸­çš„æ²‰ç§¯èƒ½é‡ï¼Œå¹¶è®°å½•ä¸‹å¾„è¿¹èµ·ç‚¹æ—¶é—´
+// ÊÕ¼¯µ¥¸ö¾¶¼£ÔÚ¾§ÌåÖĞµÄ³Á»ıÄÜÁ¿£¬²¢¼ÇÂ¼ÏÂ¾¶¼£ÆğµãÊ±¼ä
 void Run::AddTrackEdep_Time(G4double energy, G4double time){
   fTrackTime_dep.push_back(TimeEdep(time, energy));
 }
 
 
-// æ”¶é›†æ¯ä¸ªeventåœ¨æ™¶ä½“ä¸­çš„æ²‰ç§¯èƒ½é‡åŠäº‹ä»¶æ—¶é—´
+// ÊÕ¼¯Ã¿¸öeventÔÚ¾§ÌåÖĞµÄ³Á»ıÄÜÁ¿¼°ÊÂ¼şÊ±¼ä
 void Run::AddEventEdep_Time(vector<TimeEdep>& timeDep){
   fEventTime_edep.insert(fEventTime_edep.end(),timeDep.begin(),timeDep.end());
 }
@@ -165,8 +165,8 @@ void Run::AddEdep(G4double edep)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// æ”¶é›†å„è¡°å˜æ¯æ ¸çš„è¡°å˜äº‹ä»¶ä¸­ï¼Œåœ¨æ™¶ä½“ä¸­äº§ç”Ÿçš„æ€»æ²‰ç§¯èƒ½é‡ã€‚è¿™é‡ŒæŠŠçº§è”è¡°å˜äº‹ä»¶è®¤ä¸ºæ˜¯åŒä¸€äº‹ä»¶ã€‚
-//ï¼ˆåœ¨EventAction::GetParentDecayIonä¸­è¿›è¡Œçº§è”äº‹ä»¶åˆ¤æ–­ï¼‰
+// ÊÕ¼¯¸÷Ë¥±äÄ¸ºËµÄË¥±äÊÂ¼şÖĞ£¬ÔÚ¾§ÌåÖĞ²úÉúµÄ×Ü³Á»ıÄÜÁ¿¡£ÕâÀï°Ñ¼¶ÁªË¥±äÊÂ¼şÈÏÎªÊÇÍ¬Ò»ÊÂ¼ş¡£
+//£¨ÔÚEventAction::GetParentDecayIonÖĞ½øĞĞ¼¶ÁªÊÂ¼şÅĞ¶Ï£©
 void Run::AddIronEdep(std::map<G4String, G4double>& ironSpec)
 {
   for(const auto& ironDep : ironSpec){
@@ -224,7 +224,7 @@ G4int Run::GetIonId(G4String ionName)
    std::map<G4String,G4int>::const_iterator it = fgIonMap.find(ionName);
    if ( it == fgIonMap.end()) {
      fgIonMap[ionName] = fgIonId;
-     if (fgIonId < kMaxHisto2) fgIonId++;
+     if (fgIonId < (kMaxHisto2 - 1)) fgIonId++;
    }
    return fgIonMap[ionName];
 }
@@ -278,7 +278,7 @@ void Run::Merge(const G4Run* run)
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 bool cmp(pair<G4double, G4double> a , pair<G4int, G4double> b)
 {
-	return a.first<b.first; //å‡åº
+	return a.first<b.first; //ÉıĞò
 }
 
 void Run::EndOfRun() 
@@ -335,11 +335,11 @@ void Run::EndOfRun()
     else G4cout << "\tstable" << G4endl;
  }
   //time-deposit,keV
-  //æŒ‰ç…§keyè¿›è¡Œæ’åºï¼Œå‡åº
-  // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//åˆ©ç”¨vectorå®¹å™¨å‚¨å­˜åå†è¿›è¡Œæ’åºã€‚ 
+  //°´ÕÕkey½øĞĞÅÅĞò£¬ÉıĞò
+  // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//ÀûÓÃvectorÈİÆ÷´¢´æºóÔÙ½øĞĞÅÅĞò¡£ 
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
   
-  //è½¬åŒ–ä¸ºmmä¸ºå•ä½çš„æ•°å€¼
+  //×ª»¯ÎªmmÎªµ¥Î»µÄÊıÖµ
   G4double Zrthickness = fDetector->GetActThickness()/CLHEP::mm;
   G4int NumberEvent = GetNumberOfEventToBeProcessed();
 
@@ -349,7 +349,7 @@ void Run::EndOfRun()
   os1 << "/";
   G4String outPutPath = os1.str();
 
-  // ç”Ÿæˆä»¥å˜å‚æ•°ä¸ºåç¼€çš„æ–‡ä»¶å
+  // Éú³ÉÒÔ±ä²ÎÊıÎªºó×ºµÄÎÄ¼şÃû
 	std::ostringstream os;
 	os << "EnergyDep";
 	os << Zrthickness;
@@ -357,10 +357,10 @@ void Run::EndOfRun()
   os << NumberEvent;
 	os << ".h5" ;
 	G4String fileName = os.str();
-  // è‹¥å­˜åœ¨æ—§æ–‡ä»¶ï¼Œåˆ™å…ˆåˆ é™¤
+  // Èô´æÔÚ¾ÉÎÄ¼ş£¬ÔòÏÈÉ¾³ı
   // G4String outPutPath = "../OutPut/";
   G4String wholepath = outPutPath + fileName;
-  if (remove(wholepath) != 0) { // å°è¯•åˆ é™¤æ–‡ä»¶
+  if (remove(wholepath) != 0) { // ³¢ÊÔÉ¾³ıÎÄ¼ş
     G4cout << wholepath <<" is not exist." << G4endl;
   } else {
     G4cout << wholepath <<" is deleted successfully." << G4endl;
@@ -368,16 +368,16 @@ void Run::EndOfRun()
 
   Hdf5WriteValue write;
 
-  // å°†å„ä¸ªæ ¸ç´ çš„è¡°å˜äº‹ä»¶ä¸­èƒ½é‡æ²‰ç§¯æ•°æ®è¾“å‡º
+  // ½«¸÷¸öºËËØµÄË¥±äÊÂ¼şÖĞÄÜÁ¿³Á»ıÊı¾İÊä³ö
   // fstream datafile;
   for ( const auto& oneIroEdep : fIronSpectrum ) {
     vector<G4double> energyEdp = oneIroEdep.second;
-    //å°†æ•°æ®å†™å…¥HDF5
+    //½«Êı¾İĞ´ÈëHDF5
     int size = energyEdp.size();
     if(size>0){
       write.CreateNewFile(wholepath); //"../OutPut/EnergyDep.h5"
       write.CreateGroup("groupA");
-      write.CreateDataspace(1, 1, size);  //ç§©ï¼Œåˆ—ï¼Œè¡Œ
+      write.CreateDataspace(1, 1, size);  //ÖÈ£¬ÁĞ£¬ĞĞ
       write.CreateDoubleDataset(oneIroEdep.first);
       write.WriteDoubleValue(energyEdp.data());
       write.CloseFile();
@@ -392,7 +392,7 @@ void Run::EndOfRun()
     }
     datafile.close();*/
   }
-  // ç”Ÿæˆä»¥å˜å‚æ•°ä¸ºåç¼€çš„æ–‡ä»¶å
+  // Éú³ÉÒÔ±ä²ÎÊıÎªºó×ºµÄÎÄ¼şÃû
 	std::ostringstream os2;
 	os2 << "TimeEdep";
 	os2 << Zrthickness;
@@ -401,11 +401,11 @@ void Run::EndOfRun()
 	os2 << ".h5" ;
 	G4String fileName2 = os2.str();
   G4String wholepath2 = outPutPath + fileName2;
-  // è¾“å‡ºå„ä¸ªç²’å­å¾„è¿¹çš„æ²‰ç§¯èƒ½é‡å’Œæ²‰ç§¯æ—¶åˆ»
+  // Êä³ö¸÷¸öÁ£×Ó¾¶¼£µÄ³Á»ıÄÜÁ¿ºÍ³Á»ıÊ±¿Ì
   //
   vector<G4double> energyVec;
   vector<G4double> timeVec;
-  // å°†æ–‡ä»¶å†™å…¥HDF5
+  // ½«ÎÄ¼şĞ´ÈëHDF5
   Hdf5WriteValue write2;
   write2.CreateNewFile(wholepath2);//"../OutPut/TimeEdep.h5"
   write2.CreateGroup("Data");
@@ -432,7 +432,7 @@ void Run::EndOfRun()
   write2.CreateDoubleDataset("TackEdep");
   write2.WriteDoubleValue(energyVec.data());
   
-  //æ¸…ç©ºå®¹å™¨,åŠæ—¶é‡Šæ”¾ç³»ç»Ÿå†…å­˜
+  //Çå¿ÕÈİÆ÷,¼°Ê±ÊÍ·ÅÏµÍ³ÄÚ´æ
   vector<G4double>().swap(timeVec);
   vector<G4double>().swap(energyVec);
   */
@@ -462,7 +462,7 @@ void Run::EndOfRun()
   
   write2.CloseFile();
 
-  //æ¸…ç©ºå®¹å™¨,åŠæ—¶é‡Šæ”¾ç³»ç»Ÿå†…å­˜
+  //Çå¿ÕÈİÆ÷,¼°Ê±ÊÍ·ÅÏµÍ³ÄÚ´æ
   vector<G4double>().swap(timeVec);
   vector<G4double>().swap(energyVec);
 

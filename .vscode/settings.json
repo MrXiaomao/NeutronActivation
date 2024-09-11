@@ -137,6 +137,7 @@
         "xutility": "cpp",
         "xmemory": "cpp",
         "xiosbase": "cpp",
-        "ios": "cpp"
+        "ios": "cpp",
+        "plot2.C": "cpp"
     }
 }

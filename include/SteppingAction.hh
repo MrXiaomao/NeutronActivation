@@ -1,7 +1,3 @@
-// $Id: SteppingAction.hh 66241 2012-12-13 18:34:42Z gunter $
-//
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 #ifndef SteppingAction_h
 #define SteppingAction_h 1
@@ -25,7 +21,7 @@ class SteppingAction : public G4UserSteppingAction
    ~SteppingAction();
 
     virtual void UserSteppingAction(const G4Step*);
-    void  CountAndFixedPhysics(const G4Step* aStep);//ç»Ÿè®¡å¼ºå­æ ¸ååº”ä»¥åŠå¯¹éƒ¨åˆ†é‡è¦å¼ºå­ååº”åšä¿®æ­£
+    void  CountAndFixedPhysics(const G4Step* aStep);//Í³¼ÆÇ¿×ÓºË·´Ó¦ÒÔ¼°¶Ô²¿·ÖÖØÒªÇ¿×Ó·´Ó¦×öĞŞÕı
     static void GeneratedataFileName(DetectorConstruction*);
   private:
     std::map<G4ParticleDefinition*,G4int> fParticleFlag;    

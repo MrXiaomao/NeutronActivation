@@ -57,7 +57,7 @@ void EventAction::AddTimeEdep(G4double edep,G4double time)
 {
   // AddIronEdep(edep,time);
 
-  // åˆ¤åˆ«å½“å‰äº‹ä»¶æ˜¯å¦å±äºæŸä¸€ä¸ªæ ¸äº‹ä»¶
+  // ÅĞ±ğµ±Ç°ÊÂ¼şÊÇ·ñÊôÓÚÄ³Ò»¸öºËÊÂ¼ş
   G4bool isNotNewTime = false;
   vector<TimeEdep>::iterator iter;
   for( iter = fIonDecayTimeEnergy.begin(); iter != fIonDecayTimeEnergy.end(); iter++)    
@@ -81,14 +81,14 @@ void EventAction::AddEflow(G4double Eflow)
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
-// æ·»åŠ æ ¸ç´ è¡°å˜äº‹ä»¶çš„æ¯æ ¸åç§°ä»¥åŠæ—¶åˆ»
-// å¦‚æœä¸¤æ¬¡è¡°å˜çš„æ—¶é—´ç›¸éš”å¾ˆçŸ­ï¼Œåˆ™è®¤ä¸ºå­æ ¸è¡°å˜æ˜¯ç¬å‘çš„ï¼Œåº”è¯¥è§†ä¸ºåŒä¸€äº‹ä»¶ã€‚
+// Ìí¼ÓºËËØË¥±äÊÂ¼şµÄÄ¸ºËÃû³ÆÒÔ¼°Ê±¿Ì
+// Èç¹ûÁ½´ÎË¥±äµÄÊ±¼äÏà¸ôºÜ¶Ì£¬ÔòÈÏÎª×ÓºËË¥±äÊÇË²·¢µÄ£¬Ó¦¸ÃÊÓÎªÍ¬Ò»ÊÂ¼ş¡£
 void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double time)
 {
-  // ä¸ç»Ÿè®¡ç¬å‘çš„æ ¸è¡°å˜äº‹ä»¶
+  // ²»Í³¼ÆË²·¢µÄºËË¥±äÊÂ¼ş
   if(time < gGountBeginTime) return;
 
-  // è®°å½•å„ä¸ªæ¯æ ¸è¡°å˜æ—¶åˆ»
+  // ¼ÇÂ¼¸÷¸öÄ¸ºËË¥±äÊ±¿Ì
   G4bool isNotNewTime = false;
   for ( const auto& DecayTime : fIonDecayTimeEnergy) {
     G4double deltaTime = time - DecayTime.depTime;
@@ -101,7 +101,7 @@ void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double 
 
   G4String name = particle->GetParticleName();
 
-  //å¦‚æœä¸¤æ¬¡è¡°å˜çš„æ—¶é—´é—´éš”å¤§äºæŒ‡å®šæ•°å€¼ï¼Œåˆ™è®¤ä¸ºæ˜¯ä¸¤ä¸ªäº‹ä»¶
+  //Èç¹ûÁ½´ÎË¥±äµÄÊ±¼ä¼ä¸ô´óÓÚÖ¸¶¨ÊıÖµ£¬ÔòÈÏÎªÊÇÁ½¸öÊÂ¼ş
   G4bool istimeExit = false;
   for ( const auto& IonDecayTime : fIonDecayTime) {
     G4double deltaTime = time - IonDecayTime.second;
@@ -111,7 +111,7 @@ void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double 
     }
   }
 
-  // å¦‚æœæ—¶åˆ»ä¸å±äºä»»ä½•ä¸€æ¬¡æ ¸äº‹ä»¶ï¼Œåˆ™æ·»åŠ è¯¥è¡°å˜çš„æ¯æ ¸åç§°ä»¥åŠæ—¶åˆ»
+  // Èç¹ûÊ±¿Ì²»ÊôÓÚÈÎºÎÒ»´ÎºËÊÂ¼ş£¬ÔòÌí¼Ó¸ÃË¥±äµÄÄ¸ºËÃû³ÆÒÔ¼°Ê±¿Ì
   if(istimeExit)  return;
 
   G4double meanLife = particle->GetPDGLifeTime();
@@ -120,21 +120,21 @@ void EventAction::AddNewDacayTime(const G4ParticleDefinition* particle,G4double 
   }
 }
 
-// åŠŸèƒ½ï¼šæŸ¥æ‰¾è¯¥æ—¶åˆ»å±äºå“ªä¸€æ¬¡æ¯æ ¸çš„çº§è”è¡°å˜äº‹ä»¶
-// timeï¼šå½“å‰æ²‰ç§¯èƒ½é‡çš„æ—¶åˆ»
+// ¹¦ÄÜ£º²éÕÒ¸ÃÊ±¿ÌÊôÓÚÄÄÒ»´ÎÄ¸ºËµÄ¼¶ÁªË¥±äÊÂ¼ş
+// time£ºµ±Ç°³Á»ıÄÜÁ¿µÄÊ±¿Ì
 G4String EventAction::GetParentDecayIon(G4double time)
 {
   G4String ionName = "";
  
-  // å¦‚æœtimeå°äºè®¾å®šå€¼ï¼Œåˆ™è®¤ä¸ºæ˜¯æ´»åŒ–äº§ç”Ÿç¬å‘ç²’å­ï¼Œä¸ç»Ÿè®¡èƒ½é‡
+  // Èç¹ûtimeĞ¡ÓÚÉè¶¨Öµ£¬ÔòÈÏÎªÊÇ»î»¯²úÉúË²·¢Á£×Ó£¬²»Í³¼ÆÄÜÁ¿
   if(time < gGountBeginTime) {
     return ionName;
   }
 
-  // åœ¨å½“å‰äº‹ä»¶ä¸­çš„æ‰€æœ‰æ¯æ ¸è¡°å˜äº‹ä»¶ï¼ŒæŸ¥æ‰¾timeåœ¨å“ªä¸€æ¬¡è¡°å˜äº‹ä»¶çš„æ—¶é—´çª—å†…ï¼Œå¹¶è¿”å›ç›¸åº”çš„æ¯æ ¸åç§°
-  // æ³¨æ„æ²‰ç§¯èƒ½é‡çš„æ—¶åˆ»ä¸€å®šä½äºæ¯æ ¸è¡°å˜æ—¶åˆ»ä¹‹åï¼Œä¹Ÿå°±æ˜¯åªè€ƒè™‘deltaT>=0.0
+  // ÔÚµ±Ç°ÊÂ¼şÖĞµÄËùÓĞÄ¸ºËË¥±äÊÂ¼ş£¬²éÕÒtimeÔÚÄÄÒ»´ÎË¥±äÊÂ¼şµÄÊ±¼ä´°ÄÚ£¬²¢·µ»ØÏàÓ¦µÄÄ¸ºËÃû³Æ
+  // ×¢Òâ³Á»ıÄÜÁ¿µÄÊ±¿ÌÒ»¶¨Î»ÓÚÄ¸ºËË¥±äÊ±¿ÌÖ®ºó£¬Ò²¾ÍÊÇÖ»¿¼ÂÇdeltaT>=0.0
   G4bool istimeExit = false;
-  // è®°å½•ç¦»è¯¥æ—¶åˆ»æœ€è¿‘çš„é‚£æ¬¡è¡°å˜äº‹ä»¶ï¼Œæ¯æ ¸åç§°ï¼Œä»¥åŠç¦»æ¯æ ¸è¡°å˜æ—¶åˆ»çš„æ—¶é—´å·®ã€‚
+  // ¼ÇÂ¼Àë¸ÃÊ±¿Ì×î½üµÄÄÇ´ÎË¥±äÊÂ¼ş£¬Ä¸ºËÃû³Æ£¬ÒÔ¼°ÀëÄ¸ºËË¥±äÊ±¿ÌµÄÊ±¼ä²î¡£
   G4String nearlyIronName = "";
   G4double minDelta = 0.;
   nearlyIronName = fIonDecayTime.begin()->first;
@@ -143,13 +143,13 @@ G4String EventAction::GetParentDecayIon(G4double time)
   for ( const auto& IonDecayTime : fIonDecayTime) {
     G4double deltaT = time - IonDecayTime.second;
     
-    // æ›´æ–°è¯¥æ¬¡æ²‰ç§¯èƒ½é‡å‰æœ€è¿‘çš„ä¸€æ¬¡æ ¸è¡°å˜äº‹ä»¶
+    // ¸üĞÂ¸Ã´Î³Á»ıÄÜÁ¿Ç°×î½üµÄÒ»´ÎºËË¥±äÊÂ¼ş
     if(deltaT>=0. && minDelta>deltaT){
       minDelta = deltaT;
       nearlyIronName = IonDecayTime.first;
     }
 
-    // ç»Ÿè®¡è¡°å˜æ—¶åˆ»çš„æ—¶é—´çª—å†…ï¼Œæ˜¯å¦æœ‰è¯¥æ ¸ç´ å‡ºç°
+    // Í³¼ÆË¥±äÊ±¿ÌµÄÊ±¼ä´°ÄÚ£¬ÊÇ·ñÓĞ¸ÃºËËØ³öÏÖ
     if(deltaT>=0. && deltaT < gTimeWidth) {
       istimeExit = true;
       ionName = IonDecayTime.first;
@@ -160,7 +160,7 @@ G4String EventAction::GetParentDecayIon(G4double time)
     }
   }
   
-  //è‹¥è¿™ä¸€æ¬¡æ²‰ç§¯èƒ½é‡æ—¶åˆ»ä¸å±äºä»»ä½•ä¸€æ¬¡è¡°å˜æ ¸ç´ çš„è¡°å˜äº‹ä»¶ï¼Œåˆ™æ‰“å°å¼‚å¸¸
+  //ÈôÕâÒ»´Î³Á»ıÄÜÁ¿Ê±¿Ì²»ÊôÓÚÈÎºÎÒ»´ÎË¥±äºËËØµÄË¥±äÊÂ¼ş£¬Ôò´òÓ¡Òì³£
   if(!istimeExit && fIonDecayTime.size()>0){
     // G4cout<<"NearlyDecayIronName = "<<nearlyIronName<<", deltaTime = "<<minDelta<<G4endl;
   }
@@ -178,7 +178,7 @@ void EventAction::EndOfEventAction(const G4Event* )
   run->AddEdep (fTotalEnergyDeposit);             
   run->AddEflow(fTotalEnergyFlow);
 
-  //å½“ç»Ÿè®¡åˆ°æœ‰æ•°æ®æ—¶æ‰è¿›è¡Œç´¯åŠ ï¼Œåªæœ‰é›¶æ—¶åˆ»æœ‰æ•°æ®åˆ™ä¸ç»Ÿè®¡ã€‚
+  //µ±Í³¼Æµ½ÓĞÊı¾İÊ±²Å½øĞĞÀÛ¼Ó£¬Ö»ÓĞÁãÊ±¿ÌÓĞÊı¾İÔò²»Í³¼Æ¡£
   if(fIonDecayTime.size()>0){
     run->AddIronEdep(fIonEdep);
   }

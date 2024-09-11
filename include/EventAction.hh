@@ -1,6 +1,3 @@
-// $Id: EventAction.hh 76293 2013-11-08 13:11:23Z gcosmo $
-// 
-
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -34,15 +31,15 @@ class EventAction : public G4UserEventAction
     void AddNewDacayTime(const G4ParticleDefinition* patticle,G4double time);
     void AddIronEdep (G4double edep,G4double time);
     void AddTimeEdep (G4double edep,G4double time);
-    G4String GetParentDecayIon(G4double time); //åˆ¤æ–­è¯¥æ¬¡æ²‰ç§¯èƒ½é‡æ—¶é—´æ‰€å±çš„è¡°å˜æ¯æ ¸åç§°
+    G4String GetParentDecayIon(G4double time); //ÅĞ¶Ï¸Ã´Î³Á»ıÄÜÁ¿Ê±¼äËùÊôµÄË¥±äÄ¸ºËÃû³Æ
 
-    //æ¯æ ¸è¡°å˜æ—¶åˆ»ï¼Œ<æ ¸ç´ åï¼Œæ—¶åˆ»>
+    //Ä¸ºËË¥±äÊ±¿Ì£¬<ºËËØÃû£¬Ê±¿Ì>
     std::map<G4String, G4double> fIonDecayTime;
     
-    // æ¯æ ¸è¡°å˜æ—¶é—´ï¼Œåœ¨æ—¶é—´çª—å†…çš„æ€»æ²‰ç§¯èƒ½
+    // Ä¸ºËË¥±äÊ±¼ä£¬ÔÚÊ±¼ä´°ÄÚµÄ×Ü³Á»ıÄÜ
     vector<TimeEdep> fIonDecayTimeEnergy; 
     
-    //åœ¨æ¯æ ¸è¡°å˜äº‹ä»¶çš„æ—¶é—´çª—å†…ï¼Œæ¢æµ‹å™¨ä¸­çš„æ€»æ²‰ç§¯èƒ½é‡ã€‚
+    //ÔÚÄ¸ºËË¥±äÊÂ¼şµÄÊ±¼ä´°ÄÚ£¬Ì½²âÆ÷ÖĞµÄ×Ü³Á»ıÄÜÁ¿¡£
     std::map<G4String, G4double> fIonEdep; 
 
   private:

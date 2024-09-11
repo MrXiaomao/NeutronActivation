@@ -1,5 +1,3 @@
-// $Id: ActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $
-//
 /// \file ActionInitialization.cc
 /// \brief Implementation of the ActionInitialization class
 
@@ -12,7 +10,7 @@
 #include "SteppingAction.hh"
 #include "SteppingVerbose.hh"
 #include "StackAction.hh"
-//<unistd.h>ä¸­çš„accesså¯ä»¥åˆ¤æ–­æ–‡ä»¶æ˜¯å¦å­˜åœ¨ï¼Œ<>ä¸­çš„å¯ä»¥åˆ›å»ºæ–‡ä»¶ã€‚
+//<unistd.h>ÖĞµÄaccess¿ÉÒÔÅĞ¶ÏÎÄ¼şÊÇ·ñ´æÔÚ£¬<>ÖĞµÄ¿ÉÒÔ´´½¨ÎÄ¼ş¡£
 #include <unistd.h>
 
 #include <sys/stat.h>
@@ -42,21 +40,21 @@ void ActionInitialization::BuildForMaster() const
 	os << fDetector->GetActRotate();
   os << "/";
   G4String path = os.str();
-  // æ¸…é™¤å†å²è¾“å‡ºæ–‡ä»¶
+  // Çå³ıÀúÊ·Êä³öÎÄ¼ş
   // const char *path = "../OutPut/";
   // G4String G4path = path;
-  //åˆ¤æ–­æ–‡ä»¶å¤¹æ˜¯å¦å­˜åœ¨ï¼Œä¸å­˜åœ¨åˆ™åˆ›å»º
-  if (access(path, 0) == -1){   //å¦‚æœæ–‡ä»¶å¤¹ä¸å­˜åœ¨
+  //ÅĞ¶ÏÎÄ¼ş¼ĞÊÇ·ñ´æÔÚ£¬²»´æÔÚÔò´´½¨
+  if (access(path, 0) == -1){   //Èç¹ûÎÄ¼ş¼Ğ²»´æÔÚ
     mkdir(path,0777);
   }
   /*else{
-    // åˆ é™¤ç›®å½•ä¸­çš„æ‰€æœ‰å†…å®¹
-    std::string command = "rm -r " + std::string(path);  // æ„é€ åˆ é™¤å‘½ä»¤
-    int result = std::system(command.c_str());  // è°ƒç”¨ç³»ç»Ÿå‘½ä»¤
+    // É¾³ıÄ¿Â¼ÖĞµÄËùÓĞÄÚÈİ
+    std::string command = "rm -r " + std::string(path);  // ¹¹ÔìÉ¾³ıÃüÁî
+    int result = std::system(command.c_str());  // µ÷ÓÃÏµÍ³ÃüÁî
     if (result == 0) {
-        G4cout << "æˆåŠŸåˆ é™¤æ–‡ä»¶å¤¹ï¼š" << path << G4endl;
+        G4cout << "³É¹¦É¾³ıÎÄ¼ş¼Ğ£º" << path << G4endl;
     } else {
-        G4cout << "åˆ é™¤æ–‡ä»¶å¤¹å¤±è´¥ï¼š" << path << G4endl;
+        G4cout << "É¾³ıÎÄ¼ş¼ĞÊ§°Ü£º" << path << G4endl;
     }
   }
   mkdir(G4path,0777);

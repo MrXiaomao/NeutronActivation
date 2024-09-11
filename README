@@ -1,22 +1,3 @@
-        ============================================================
-          聚变中子的产额测量，研究LaBr3测锆活化体给出不同时间段的测量能谱
-        ============================================================
-
-大前提：假定各个衰变时间都独立，也就是不考虑符合事件。
-1、发射中子，给出活化的核素及其坐标，质子数，核子数，(x,y,z)坐标，几何序号。保存到HDF5文件中
-①Z,A,posx,posy,posz,GeoID
-注意：这一步不让其衰变，核素禁用衰变列表，以及离子核过程。
-
-②、给出各个核素的平均中子产额，给出核素随空间的分布（绘图进行观察，采用平均偏差，给出各空间网格的核子数密度是否具有一致性）
-（这一步可取决于后续可否将核素视为均匀进行抽样）
-
-2、进行理论分析，结合衰变链，给出不同时刻的各个核素实际数目。
-
-3、接续第一步，进行衰变计算，给出不同时刻的能谱，也就是在发射粒子时给出特定时刻下的核素分支比。然后进行核素均匀抽样。
-   注意，不同区域核素成分不同，或者说核素的产生区域和。
-   抽样时，①先抽样给出核素，
-
-$Id: README 69174 2013-04-21 20:38:15Z maire $
 
      =========================================================
      Geant4 - an Object-Oriented Toolkit for Simulation in HEP
@@ -67,14 +48,9 @@ $Id: README 69174 2013-04-21 20:38:15Z maire $
   GammmaNuclearPhysics is a subset of G4BertiniElectroNuclearBuilder.
 
   ElectromagneticPhysics is a simplified version of G4EmStandardPhysics.
-  In particular, no step constraint is imposed for energy loss mechanism (ionisation and brems).
-  This is enough when spatial distribution of deposited energy do not need
-  to be accurate (see param->SetStepFunction(1., 1*mm)).
 
   Several hadronic physics options are controlled by environment variables.
-  To trigger them, the envHadronic.csh script has been added in this example.
-  One must select the options wished, and do
-        source envHadronic.[c]sh
+  To select them, see Activation.cc
 
  3- AN EVENT : THE PRIMARY GENERATOR
  
@@ -177,3 +153,11 @@ $Id: README 69174 2013-04-21 20:38:15Z maire $
  	Idle> type your commands
  	....
  	Idle> exit
+	
+ Macros provided in this example:
+  - Bi209.mac: neutron (25 meV) on 10 cm of Bi209
+  - Co60.mac:  neutron (25 meV) on 1 cm of Cobalt.
+    
+ Macros to be run interactively:
+  - debug.mac: neutron (25 meV) on Cobalt
+  - vis.mac: To activate visualization

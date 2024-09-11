@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Setup the project
-cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9...3.21)
 project(Activation)
 
 #----------------------------------------------------------------------------
@@ -53,10 +53,8 @@ target_link_libraries(Activation ${Geant4_LIBRARIES} -lstdc++fs ${HDF5_CXX_LIBRA
 #
 set(Activation_SCRIPTS
     loop.mac
-    detector.mac
-    envHadronic.csh
-    envHadronic.sh
     run.mac
+    plotHisto.C
     vis.mac
     init_vis.mac
   )

@@ -1,4 +1,3 @@
-
 #ifndef DetectorConstruction_h
 #define DetectorConstruction_h 1
 
@@ -45,48 +44,47 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    void PrintParameters();
 
   private:
-
    //中子活化靶,Zr
-   G4double           fActThickness = 0.;
-   G4double           fActRadius = 0.;
-   G4double           fActRotate = 0.0; //锆帽旋转角度
-   G4Material*        fActiveMaterial = nullptr;
-   G4LogicalVolume*   fLActivator = nullptr;
+   G4double           fActThickness; // 锆帽厚度
+   G4double           fActRadius; // 锆帽半径
+   G4double           fActRotate; // 锆帽旋转角度
+   G4Material*        fActiveMaterial;
+   G4LogicalVolume*   fLActivator;
 
    // LaBr3探测器
-   G4Material*        fLaBr3Material = nullptr;
-   G4LogicalVolume*   fLLaBr3 = nullptr;
+   G4Material*        fLaBr3Material;
+   G4LogicalVolume*   fLLaBr3;
 
   // AlAlloy Al合金
-    G4Material*        fAlAlloyMaterial = nullptr;
-   G4LogicalVolume*   fLAlAlloy = nullptr;
+    G4Material*        fAlAlloyMaterial;
+   G4LogicalVolume*   fLAlAlloy;
 
   // MgO反射层
-   G4Material*        fMgOMaterial = nullptr;
-   G4LogicalVolume*   fLMgO = nullptr;
+   G4Material*        fMgOMaterial;
+   G4LogicalVolume*   fLMgO;
 
    // PMT光电倍增管
-   G4Material*        fPMTMaterial = nullptr;
-   G4LogicalVolume*   fLPMT = nullptr;
+   G4Material*        fPMTMaterial;
+   G4LogicalVolume*   fLPMT;
    
     // 聚乙烯
-   G4Material*        fCH2Material = nullptr;
-   G4LogicalVolume*   fLCH2 = nullptr;
+   G4Material*        fCH2Material;
+   G4LogicalVolume*   fLCH2;
 
-   G4double           fWorldSizeXY = 0.;
-   G4double           fWorldSizeZ = 0.;
-   G4Material*        fWorldMaterial = nullptr;
-   G4VPhysicalVolume* fWorldVolume = nullptr;                        
+   G4double           fWorldSizeXY;
+   G4double           fWorldSizeZ;
+   G4Material*        fWorldMaterial;
+   G4VPhysicalVolume* fWorldVolume;                        
 
-   DetectorMessenger* fDetectorMessenger = nullptr;
+   DetectorMessenger* fDetectorMessenger;
 
   private:
 
    void               DefineMaterials();
    G4VPhysicalVolume* ConstructVolumes();  
-
+  
   protected:
-    G4LogicalVolume* fScoringVolume;   
+    G4LogicalVolume* fScoringVolume;        
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

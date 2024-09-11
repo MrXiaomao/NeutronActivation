@@ -13,7 +13,8 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 PrimaryGeneratorAction::PrimaryGeneratorAction(DetectorConstruction* det)
-:fDetector(det)
+:G4VUserPrimaryGeneratorAction(),
+ fDetector(det), fRndmBeam(0.), fTimeExposure(0.), fGunMessenger(nullptr)
 {
   fParticleGun  = new G4ParticleGun(1);
   fParticleGun2 = new G4GeneralParticleSource();

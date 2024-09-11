@@ -88,7 +88,7 @@ DetectorMessenger::~DetectorMessenger()
 void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
 { 
   if( command == fMaterCmd )
-   { fDetector->SetAbsorMaterial(newValue);}
+   { fDetector->SetActMaterial(newValue);}
 
   if( command == fThickCmd )
    { fDetector->SetActThickness(fThickCmd->GetNewDoubleValue(newValue));}
@@ -104,7 +104,7 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
      is >> name >> Z >> A >> dens >> unt;
      dens *= G4UIcommand::ValueOf(unt);
      fDetector->MaterialWithSingleIsotope (name,name,dens,Z,A);
-     fDetector->SetAbsorMaterial(name);    
+     fDetector->SetActMaterial(name);    
    }   
 }
 

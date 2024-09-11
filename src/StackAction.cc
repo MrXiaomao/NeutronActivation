@@ -23,7 +23,7 @@ StackAction::~StackAction()
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 G4ClassificationOfNewTrack
-StackAction::ClassifyNewTrack(const G4Track * aTrack)
+StackAction::ClassifyNewTrack(const G4Track * )
 {
   return fUrgent;
 }

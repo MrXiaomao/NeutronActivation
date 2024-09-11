@@ -112,6 +112,7 @@ void Run::SetPrimary(G4ParticleDefinition* particle, G4double energy)
 
 void Run::CountProcesses(const G4VProcess* process) 
 {
+  if (process == nullptr) return;
   G4String procName = process->GetProcessName();
   std::map<G4String,G4int>::iterator it = fProcCounter.find(procName);
   if ( it == fProcCounter.end()) {
@@ -287,13 +288,13 @@ void Run::EndOfRun()
   
   //run condition
   //
-  G4Material* material = fDetector->GetAbsorMaterial();
+  G4Material* material = fDetector->GetActMaterial();
   G4double density = material->GetDensity();
    
   G4String Particle = fParticle->GetParticleName();    
   G4cout << "\n The run is " << numberOfEvent << " "<< Particle << " of "
          << G4BestUnit(fEkin,"Energy") << " through " 
-         << G4BestUnit(fDetector->GetAbsorThickness(),"Length") << " of "
+         << G4BestUnit(fDetector->GetActThickness(),"Length") << " of "
          << material->GetName() << " (density: " 
          << G4BestUnit(density,"Volumic Mass") << ")" << G4endl;
 
@@ -314,7 +315,7 @@ void Run::EndOfRun()
   
   //particles count
   //
-  G4cout << "\n List of generated particles:" << G4endl;
+  G4cout << "\n List of generated particles (with meanLife != 0):" << G4endl;
      
  for ( const auto& particleData : fParticleDataMap1 ) {
     G4String name = particleData.first;
@@ -331,36 +332,20 @@ void Run::EndOfRun()
            << " --> " << G4BestUnit(eMax, "Energy") << ")";
     if (meanLife >= 0.)
       G4cout << "\tmean life = " << G4BestUnit(meanLife, "Time")   << G4endl;
-    else {
-      G4cout << "\tstable" << G4endl;
-    }
+    else G4cout << "\tstable" << G4endl;
  }
-
-  G4cout << "\n List of Activted particles:" << G4endl;  
-  for ( const auto& particleData : fParticleDataMap1 ) {
-    G4String name = particleData.first;
-    ParticleData data = particleData.second;
-    G4int count = data.fCount;
-    G4double meanLife = data.fTmean;
-         
-    if (meanLife >= 0.){
-      G4cout << "  " << std::setw(13) << name << ": " << std::setw(7) << count
-             << "\tmean life = " << G4BestUnit(meanLife, "Time")   << G4endl;
-    }
- }
-
   //time-deposit,keV
   //按照key进行排序，升序
   // vector< pair<G4String, G4double> > sortTimeDep(fIronSpectrum.begin(),fIronSpectrum.end());//利用vector容器储存后再进行排序。 
   // sort(sortTimeDep.begin(),sortTimeDep.end(),cmp);
   
   //转化为mm为单位的数值
-  G4double Zrthickness = fDetector->GetAbsorThickness()/CLHEP::mm;
+  G4double Zrthickness = fDetector->GetActThickness()/CLHEP::mm;
   G4int NumberEvent = GetNumberOfEventToBeProcessed();
 
   std::ostringstream os1;
   os1 << "../OutPut";
-	os1 << fDetector->GetZrRotate();
+	os1 << fDetector->GetActRotate();
   os1 << "/";
   G4String outPutPath = os1.str();
 

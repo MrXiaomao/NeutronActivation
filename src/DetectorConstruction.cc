@@ -26,7 +26,7 @@
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 DetectorConstruction::DetectorConstruction(G4double r):
-  fZrRotate(r),
+  fActRotate(r),
   fScoringVolume(0)
 {
   // default geometrical parameters
@@ -37,7 +37,7 @@ DetectorConstruction::DetectorConstruction(G4double r):
 
   // materials
   DefineMaterials();
-  SetAbsorMaterial("G4_Zr");
+  SetActMaterial("G4_Zr");
 
   // create commands for interactive definition of the geometry
   fDetectorMessenger = new DetectorMessenger(this);
@@ -169,7 +169,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double posZ1 = LengthZrCap*0.5;
   
   G4RotationMatrix* rm = new G4RotationMatrix();
-    rm->rotateX(fZrRotate*degree);
+    rm->rotateX(fActRotate*degree);
   G4Tubs* ZrCup =  new G4Tubs("ZrCup", 0., radius_ZrCap, LengthZrCap*0.5, 0.0*deg, 360*deg); 
   fLActivator = new G4LogicalVolume(ZrCup, fActiveMaterial, fActiveMaterial->GetName());
   new G4PVPlacement(rm,                         //no rotation
@@ -243,7 +243,7 @@ void DetectorConstruction::PrintParameters()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetAbsorMaterial(G4String materialChoice)
+void DetectorConstruction::SetActMaterial(G4String materialChoice)
 {
   // search the material by its name
   G4Material* pttoMaterial =

@@ -1,6 +1,6 @@
 #----------------------------------------------------------------------------
 # Setup the project
-cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.9 FATAL_ERROR)
 project(Activation)
 
 #----------------------------------------------------------------------------
@@ -35,8 +35,11 @@ include(${Geant4_USE_FILE})
 include_directories(${PROJECT_SOURCE_DIR}/include 
                     ${Geant4_INCLUDE_DIR})
 
-file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc ${PROJECT_SOURCE_DIR}/HDF5/Hdf5ReadValue.cc ${PROJECT_SOURCE_DIR}/HDF5/Hdf5WriteValue.cc)
-file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh ${PROJECT_SOURCE_DIR}/HDF5/Hdf5Function.h)
+file(GLOB sources ${PROJECT_SOURCE_DIR}/src/*.cc 
+                  ${PROJECT_SOURCE_DIR}/HDF5/Hdf5ReadValue.cc 
+		  ${PROJECT_SOURCE_DIR}/HDF5/Hdf5WriteValue.cc)
+file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh 
+                  ${PROJECT_SOURCE_DIR}/HDF5/Hdf5Function.h)
 #----------------------------------------------------------------------------
 # Add the executable, and link it to the Geant4 libraries
 #

@@ -39,7 +39,7 @@ void ActionInitialization::BuildForMaster() const
 {
   std::ostringstream os;
   os << "../OutPut";
-	os << fDetector->GetZrRotate();
+	os << fDetector->GetActRotate();
   os << "/";
   G4String path = os.str();
   // 清除历史输出文件
@@ -84,7 +84,7 @@ void ActionInitialization::Build() const
   StackAction* stackAct = new StackAction();
   SetUserAction(stackAct);
 
-  SteppingAction* steppingAction = new SteppingAction(fDetector, event, trackingAction,stackAct);
+  SteppingAction* steppingAction = new SteppingAction(fDetector, event, trackingAction, stackAct);
   SetUserAction(steppingAction);
 }  
 

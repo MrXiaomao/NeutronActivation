@@ -28,14 +28,14 @@ class DetectorConstruction : public G4VUserDetectorConstruction
 
     void SetActThickness(G4double);
     void SetActRaius   (G4double);
-    void SetAbsorMaterial (G4String);
+    void SetActMaterial (G4String);
 
   public:  
 
-   G4double GetAbsorThickness()    {return fActThickness;};
-   G4double GetZrRotate()    {return fZrRotate;};
-   G4double GetAbsorSizeYZ()       {return fActRadius;};
-   G4Material* GetAbsorMaterial()  {return fActiveMaterial;};
+   G4double GetActThickness()    {return fActThickness;};
+   G4double GetActRotate()    {return fActRotate;};
+   G4double GetActRadius()       {return fActRadius;};
+   G4Material* GetActMaterial()  {return fActiveMaterial;};
 
    G4LogicalVolume* GetScoringVolume() const { return fScoringVolume; }
 
@@ -49,7 +49,7 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    //中子活化靶,Zr
    G4double           fActThickness = 0.;
    G4double           fActRadius = 0.;
-   G4double           fZrRotate = 0.0; //锆帽旋转角度
+   G4double           fActRotate = 0.0; //锆帽旋转角度
    G4Material*        fActiveMaterial = nullptr;
    G4LogicalVolume*   fLActivator = nullptr;
 

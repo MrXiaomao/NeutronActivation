@@ -5,6 +5,7 @@
 
 #include "RunAction.hh"
 #include "Run.hh"
+#include "SteppingAction.hh"
 #include "DetectorConstruction.hh"
 #include "PrimaryGeneratorAction.hh"
 #include "HistoManager.hh"
@@ -15,10 +16,6 @@
 
 #include "Randomize.hh"
 #include <iomanip>
-
-#include <fstream>
-#include <stdio.h>
-using namespace std;
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -50,7 +47,10 @@ G4Run* RunAction::GenerateRun()
 void RunAction::BeginOfRunAction(const G4Run*)
 { 
   // show Rndm status
-  if (isMaster) G4Random::showEngineStatus();
+  if (isMaster) {
+    G4Random::showEngineStatus();
+    SteppingAction::GeneratedataFileName(fDetector);
+  }
   
   // keep run condition
   if (fPrimary) { 
@@ -65,7 +65,7 @@ void RunAction::BeginOfRunAction(const G4Run*)
   G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   if ( analysisManager->IsActive() ) {
     analysisManager->OpenFile();
-  }  
+  }
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

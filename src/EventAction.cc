@@ -1,4 +1,3 @@
-
 #include "EventAction.hh"
 
 #include "Run.hh"

@@ -15,6 +15,10 @@
 #include "G4IonTable.hh"
 
 #include "G4RunManager.hh"
+
+#include <mutex>
+mutex dataFile_lock;
+
 #include "Parameter.hh"             
 using namespace myConsts;
 
@@ -36,11 +40,13 @@ G4double en_np_Y89[4] = {13.5, 14.0, 14.5, 15.0};
 G4double cs_npRatio_Y89m[4] = {0.237, 0.314, 0.427, 0.424};
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+G4String SteppingAction::fileWholePath = "data.txt";
 
 SteppingAction::SteppingAction(DetectorConstruction* det, EventAction* event,TrackingAction* track, StackAction* stack)
 : G4UserSteppingAction(), 
 fDetector(det), fEventAction(event),fTrackAction(track),fStackAction(stack),
-fScoringVolume(0)
+fScoringVolume(0),
+lasttime(0.0),lastedep(0.0)
 { }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -67,7 +73,8 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   
   //写入最新的衰变时间
   G4double decayTime = aStep->GetPostStepPoint()->GetGlobalTime();
-  if(process->GetProcessName() == "RadioactiveDecay") {
+  //需要注意，不同版本的G4,这个衰变关键字不一样，有RadioactiveDecay，RadioactiveDecayBase两种
+  if(process->GetProcessName() == "RadioactiveDecayBase") {
     fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),decayTime);
   }
 
@@ -78,20 +85,56 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   if(volume != fScoringVolume) return;
 
+  //打印上一次Event最后一个Track没有收集的数据
+  G4String volumepre;
+  G4Track* theTrack = aStep->GetTrack(); 
+  if (theTrack->GetTrackID() == 1) volumepre="primary";
+  else volumepre  = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
+  if (volumepre=="primary")
+  {
+    if (lastedep>0)
+    {
+      dataFile_lock.lock();
+      std::fstream file(fileWholePath, std::ios::app);
+      file  << std::left << std::setw(20) << std::setprecision(9)<<std::fixed<<lastedep/CLHEP::keV
+            << std::left << std::setw(20) <<std::setprecision(7) << std::scientific<< lasttime <<endl;
+      file.close();
+      dataFile_lock.unlock();
+    }
+    lasttime=0.;
+    lastedep=0.;
+  }
 
   // energy deposit
   //
   G4double edepStep = aStep->GetTotalEnergyDeposit();
   if (edepStep <= 0.) return; 
+  //auto eventID = G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
+  if (abs(decayTime - lasttime)<gTimeWidth)
+  {
+		 lastedep += edepStep;
+  }
+  else 
+  {
+    if (lasttime>gGountBeginTime)
+    {
+      dataFile_lock.lock();
+      std::fstream file(fileWholePath, std::ios::app);
+      file  << std::left << std::setw(20) << std::setprecision(9)<<std::fixed<<lastedep/CLHEP::keV
+            << std::left << std::setw(20) <<std::setprecision(7) << std::scientific<< lasttime <<endl;
+      file.close();
+      dataFile_lock.unlock();
+    }
+    lastedep = edepStep;
+    lasttime = decayTime;
+  }
 
-  
   fEventAction->AddEdep(edepStep);
   fTrackAction->AddTrackEdep(edepStep);
   //只统计衰变之类的放射性，因此这里把短时间都不做统计
   if(decayTime>gGountBeginTime){
     fEventAction->AddTimeEdep(edepStep,decayTime);
   }
-  
   
  //longitudinal profile of deposited energy
  //randomize point of energy deposition
@@ -100,7 +143,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
  G4ThreeVector postPoint = aStep->GetPostStepPoint()->GetPosition();
  G4ThreeVector point = prePoint + G4UniformRand()*(postPoint - prePoint);
  G4double x = point.x();
- G4double xshifted = x + 0.5*fDetector->GetAbsorThickness();
+ G4double xshifted = x + 0.5*fDetector->GetActThickness();
  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
  analysisManager->FillH1(2, xshifted, edepStep);   
 }
@@ -149,12 +192,8 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
     
   //scattered primary particle (if any)
   //
-  G4AnalysisManager* analysis = G4AnalysisManager::Instance();
-  G4int ih = 1;
   if (aStep->GetTrack()->GetTrackStatus() == fAlive) {
-    G4double energy = endPoint->GetKineticEnergy();      
-    analysis->FillH1(ih,energy);
-    //
+    G4double energy = endPoint->GetKineticEnergy();  
     G4ThreeVector momentum = endPoint->GetMomentum();
     Q        += energy;
     Pbalance += momentum;
@@ -396,4 +435,35 @@ void  SteppingAction::CountAndFixedPhysics(const G4Step* aStep)
  
   // run->CountNuclearChannel(nuclearChannel, Q);
   fParticleFlag.clear();
+}
+
+void  SteppingAction::GeneratedataFileName(DetectorConstruction* det)
+{
+  std::ostringstream os1;
+  os1 << "../OutPut";
+	os1 << det->GetActRotate();
+  os1 << "/";
+  G4String outPutPath = os1.str();
+
+  //转化为mm为单位的数值
+  G4double Zrthickness = det->GetActThickness()/CLHEP::mm;
+  G4int NumberEvent = G4RunManager::GetRunManager()->GetNumberOfEventsToBeProcessed();
+
+  // 生成以变参数为后缀的文件名
+	std::ostringstream os;
+	os << "data";
+	os << Zrthickness;
+  os << "_";
+  os << NumberEvent;
+	os << ".txt" ;
+	G4String fileName = os.str();
+  // 若存在旧文件，则先删除
+  // G4String outPutPath = "../OutPut/";
+  G4String wholepath = outPutPath + fileName;
+  if (remove(wholepath) != 0) { // 尝试删除文件
+    G4cout << wholepath <<" is not exist." << G4endl;
+  } else {
+    G4cout << wholepath <<" is deleted successfully." << G4endl;
+  }
+  fileWholePath = wholepath;
 }

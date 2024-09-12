@@ -7,23 +7,10 @@
 #
 /testhadr/activator/setMat G4_Zr
 /testhadr/activator/setThickness 50 mm
-/testhadr/activator/setRadius 21.05 mm
-#
+
 /run/numberOfThreads 60
 /run/initialize
-#
-# Set a very high time threshold to allow all decays to happen
-#/process/had/rdm/thresholdForVeryLongDecayTime 1.0e+2 year
-#
-/gps/particle neutron
-/gps/energy 14 MeV
-/gps/pos/type Plane
-/gps/pos/shape Circle
-/gps/pos/radius 100 mm
-/gps/pos/centre 0. 0. 180. mm
-
-/gps/direction 0.0 0.0 -1.0
 
 /tracking/verbose 0
-/run/printProgress 1000000
+/run/printProgress 500000
 /run/beamOn 500000000

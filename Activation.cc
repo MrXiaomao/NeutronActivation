@@ -39,7 +39,7 @@ int main(int argc,char** argv) {
 
   //construct the run manager
   auto runManager = G4RunManagerFactory::CreateRunManager();
-  runManager->SetNumberOfThreads(2);
+  runManager->SetNumberOfThreads(1);
 
   // set mandatory initialization classes
   DetectorConstruction* det= new DetectorConstruction(ratote);

@@ -27,7 +27,7 @@
 
 DetectorConstruction::DetectorConstruction(G4double rotate)
 :G4VUserDetectorConstruction(),
-  fActThickness(10.0*mm), fActRadius(1.0*cm), fActRotate(rotate),
+  fActThickness(10.0*mm), fActRadius(1.0*cm), fActLength(0.), fActRotate(rotate),
   fActiveMaterial(nullptr), fLActivator(nullptr), 
   fLaBr3Material(nullptr), fLLaBr3(nullptr),
   fAlAlloyMaterial(nullptr), fLAlAlloy(nullptr),
@@ -38,10 +38,6 @@ DetectorConstruction::DetectorConstruction(G4double rotate)
   fWorldMaterial(nullptr), fWorldVolume(nullptr), fDetectorMessenger(nullptr),
   fScoringVolume(nullptr)
 {
-  // default geometrical parameters
-  fWorldSizeXY     = 2.*fActThickness;
-  fWorldSizeZ    = 2.*fActRadius;
-
   // materials
   DefineMaterials();
   SetActMaterial("G4_Zr");
@@ -177,6 +173,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   //① Zr Cap
   G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;
   G4double radius_ZrCap = radius_LaBr3 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap; //1.0*mm;
+  fActRadius = radius_ZrCap;
+  fActLength = LengthZrCap;
   G4double posZ1 = LengthZrCap*0.5;
   
   G4RotationMatrix* rm = new G4RotationMatrix();

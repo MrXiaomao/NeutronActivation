@@ -19,18 +19,17 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
  
-int main(int argc,char** argv) {
-
-  G4UIExecutive* ui = 0;
-  if ( argc == 1 ) {
-    ui = new G4UIExecutive(argc, argv);
-  }
-  
+int main(int argc,char** argv) { 
   G4String macro  = "nothing";
   G4double ratote = 0.0; //锆帽旋转角度
   for ( G4int i=1; i<argc; i=i+2 ) {
     if      ( G4String(argv[i]) == "-m" ) macro   = argv[i+1];
     else if ( G4String(argv[i]) == "-Rotate" ) ratote = atof(argv[i+1]);
+  }
+
+  G4UIExecutive* ui = 0;
+  if(macro == "nothing"){
+    ui = new G4UIExecutive(argc, argv);
   }
 
   //choose the Random engine

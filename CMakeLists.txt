@@ -53,9 +53,6 @@ target_link_libraries(Activation ${Geant4_LIBRARIES} -lstdc++fs ${HDF5_CXX_LIBRA
 #
 set(Activation_SCRIPTS
     loop.mac
-    detector.mac
-    envHadronic.csh
-    envHadronic.sh
     run.mac
     vis.mac
     init_vis.mac

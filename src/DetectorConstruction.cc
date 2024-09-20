@@ -25,16 +25,19 @@
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-DetectorConstruction::DetectorConstruction(G4double r):
-  fActRotate(r),
-  fScoringVolume(0)
+DetectorConstruction::DetectorConstruction(G4double rotate)
+:G4VUserDetectorConstruction(),
+  fActThickness(10.0*mm), fActRadius(1.0*cm), fActLength(0.), fActRotate(rotate),
+  fActiveMaterial(nullptr), fLActivator(nullptr), 
+  fLaBr3Material(nullptr), fLLaBr3(nullptr),
+  fAlAlloyMaterial(nullptr), fLAlAlloy(nullptr),
+  fMgOMaterial(nullptr), fLMgO(nullptr),
+  fPMTMaterial(nullptr), fLPMT(nullptr),
+  fCH2Material(nullptr), fLCH2(nullptr),
+  fWorldSizeXY(0.0), fWorldSizeZ(0.0),
+  fWorldMaterial(nullptr), fWorldVolume(nullptr), fDetectorMessenger(nullptr),
+  fScoringVolume(nullptr)
 {
-  // default geometrical parameters
-  fActThickness = 1*mm;
-  fActRadius    = 1.905*cm;
-  fWorldSizeXY   = 2.*fActThickness;
-  fWorldSizeZ  = 2.*fActRadius;
-
   // materials
   DefineMaterials();
   SetActMaterial("G4_Zr");
@@ -70,7 +73,7 @@ void DetectorConstruction::DefineMaterials()
   fLaBr3Material->AddElement(La, 0.7495);
   fLaBr3Material->AddElement(Br, 0.2005);
   fLaBr3Material->AddElement(Ce, 0.05);
-  
+
   //MgO反射层
   G4Element* Mg  = new G4Element("Magnesium" ,"Mg" , 12., 24.3050*g/mole);
   G4Element* O  = new G4Element("Oxygen"        ,"O" , 8., 16.00*g/mole);
@@ -166,6 +169,8 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   //① Zr Cap
   G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;
   G4double radius_ZrCap = radius_LaBr3 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap; //1.0*mm;
+  fActRadius = radius_ZrCap;
+  fActLength = LengthZrCap;
   G4double posZ1 = LengthZrCap*0.5;
   
   G4RotationMatrix* rm = new G4RotationMatrix();

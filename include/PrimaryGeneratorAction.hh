@@ -21,20 +21,21 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
   public:
     void SetDefaultKinematic();  
-    void SetRndmBeam(G4double value)  {fRndmBeam = value;}
-    void SetTimeExposure(G4double value)  {fTimeExposure = value;}
+    void SetRndmBeam(G4double value)  {;}
+    void SetTimeExposure(G4double value)  {;}
 
     void GeneratePrimaries(G4Event*) override;
          
     G4ParticleGun* GetParticleGun() {return fParticleGun;}
-    G4double GetTimeExposure() {return fTimeExposure;}
+    G4double GetTimeExposure() {return fLengthZr;}
 
   private:
     G4ParticleGun*             fParticleGun  = nullptr;
     G4GeneralParticleSource* fParticleGun2;
     DetectorConstruction*      fDetector     = nullptr;
-    G4double                   fRndmBeam     = 0.;
-    G4double                   fTimeExposure = 0.;
+    G4double                   fRadiusZr; //¸äÃ±°ë¾¶
+    G4double                   fLengthZr; //ï¯Ã±³¤¶È
+    G4double                   fRotateZr; //ï¯Ã±Ðý×ª½Ç¶È
     PrimaryGeneratorMessenger* fGunMessenger = nullptr;     
 };
 

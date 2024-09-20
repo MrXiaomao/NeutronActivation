@@ -91,7 +91,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   else volumepre  = aStep->GetPreStepPoint()->GetTouchableHandle()->GetVolume()->GetLogicalVolume()->GetName();
   if (volumepre=="primary")
   {
-    if (lastedep>0)
+    if (lastedep>0 && lasttime>gGountBeginTime)
     {
       dataFile_lock.lock();
       std::fstream file(fileWholePath, std::ios::app);

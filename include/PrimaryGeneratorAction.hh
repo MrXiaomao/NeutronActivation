@@ -21,8 +21,8 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 
   public:
     void SetDefaultKinematic();  
-    void SetRndmBeam(G4double value)  {;}
-    void SetTimeExposure(G4double value)  {;}
+    void SetRndmBeam(G4double)  {;}
+    void SetTimeExposure(G4double)  {;}
 
     void GeneratePrimaries(G4Event*) override;
          

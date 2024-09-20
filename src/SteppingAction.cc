@@ -74,7 +74,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
   //写入最新的衰变时间
   G4double decayTime = aStep->GetPostStepPoint()->GetGlobalTime();
   //需要注意，不同版本的G4,这个衰变关键字不一样，有RadioactiveDecay，RadioactiveDecayBase两种
-  if(process->GetProcessName() == "RadioactiveDecayBase") {
+  if(process->GetProcessName() == "RadioactiveDecay") {
     fEventAction->AddNewDacayTime(aStep->GetTrack()->GetParticleDefinition(),decayTime);
   }
 

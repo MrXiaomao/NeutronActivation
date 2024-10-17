@@ -70,9 +70,13 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    G4Material*        fPMTMaterial = nullptr;
    G4LogicalVolume*   fLPMT = nullptr;
    
-    // 聚乙烯
-   G4Material*        fCH2Material = nullptr;
-   G4LogicalVolume*   fLCH2 = nullptr;
+  // 聚乙烯
+  G4Material*        fCH2Material = nullptr;
+  G4LogicalVolume*   fLCH2 = nullptr;
+  
+  //SiO2 石英玻璃
+  G4Material*        fSiO2Material = nullptr;
+  G4LogicalVolume*   fLSiO2 = nullptr;
 
    G4double           fWorldSizeXY = 0.;
    G4double           fWorldSizeZ = 0.;

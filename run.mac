@@ -5,7 +5,6 @@
 /control/verbose 1
 /run/verbose 1
 #
-/testhadr/activator/setMat G4_Zr
 /testhadr/activator/setThickness 10 mm
 
 /run/numberOfThreads 13

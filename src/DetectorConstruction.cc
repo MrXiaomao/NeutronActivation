@@ -40,7 +40,7 @@ DetectorConstruction::DetectorConstruction(G4double rotate)
 {
   // materials
   DefineMaterials();
-  SetActMaterial("G4_Zr");
+  // SetActMaterial("G4_Zr");
 
   // create commands for interactive definition of the geometry
   fDetectorMessenger = new DetectorMessenger(this);
@@ -65,33 +65,50 @@ void DetectorConstruction::DefineMaterials()
   G4int ncomponents, natoms;
 
   //LaBr3
-  G4Element* La  = new G4Element("Lanthanum" ,"La" , 57., 138.9*g/mole);
+  G4Element* La  = new G4Element("Lanthanum" ,"La" , 57., 138.9055*g/mole);
   G4Element* Br  = new G4Element("Bromine" ,"Br" , 35., 79.9*g/mole);
   G4Element* Ce  = new G4Element("Cerium" ,"Ce" , 58., 140.116*g/mole);
   fLaBr3Material = new G4Material("LaBr3", 5.2*g/cm3, ncomponents=3,
                             kStateLiquid, 293*kelvin, 1*atmosphere);
-  fLaBr3Material->AddElement(La, 0.7495);
-  fLaBr3Material->AddElement(Br, 0.2005);
-  fLaBr3Material->AddElement(Ce, 0.05);
+  fLaBr3Material->AddElement(La, 0.366511094);
+  fLaBr3Material->AddElement(Br, 0.632488906);
+  fLaBr3Material->AddElement(Ce, 0.001);
 
   //MgO反射层
   G4Element* Mg  = new G4Element("Magnesium" ,"Mg" , 12., 24.3050*g/mole);
-  G4Element* O  = new G4Element("Oxygen"        ,"O" , 8., 16.00*g/mole);
+  G4Element* O  = new G4Element("Oxygen"        ,"O" , 8., 15.999*g/mole);
   fMgOMaterial = new G4Material("MgO", 3.58*g/cm3, ncomponents=2,
                             kStateSolid, 293*kelvin, 1*atmosphere);
   fMgOMaterial->AddElement(Mg, 1);
   fMgOMaterial->AddElement(O, 1);
 
   //Al合金
-  G4Element* Al  = new G4Element("Aluminium" ,"Al" , 13., 26.98*g/mole);  
+  /*G4Element* Al  = new G4Element("Aluminium" ,"Al" , 13., 26.98*g/mole);  
   fAlAlloyMaterial = new G4Material("AlAlloy", 2.65*g/cm3, ncomponents=1,
                             kStateSolid, 293*kelvin, 1*atmosphere);
   fAlAlloyMaterial->AddElement(Al,1);
+  */
+  G4Element* Si  = new G4Element("silicon" ,"Si" , 14., 28.0855*g/mole);
+  G4Element* Fe  = new G4Element("iron" ,"Fe" , 26., 55.8450*g/mole);
+  G4Element* Cu  = new G4Element("copper" ,"Cu" , 29., 63.55*g/mole);
+  G4Element* Cr  = new G4Element("chromium" ,"Cr" , 24., 51.9961*g/mole);
+  G4Element* Zn  = new G4Element("zinc" ,"Zn" , 30., 65.38*g/mole);
+  G4Element* Ti  = new G4Element("titanium" ,"Ti" , 22., 47.867*g/mole);
+  G4Element* Al  = new G4Element("Aluminium" ,"Al" , 13., 26.9815*g/mole);  
+  fAlAlloyMaterial = new G4Material("AlAlloy", 2.989*g/cm3, ncomponents=8,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fAlAlloyMaterial->AddElement(Si, 0.00232);
+  fAlAlloyMaterial->AddElement(Fe, 0.005);
+  fAlAlloyMaterial->AddElement(Cu, 0.0415);
+  fAlAlloyMaterial->AddElement(Mg, 0.015);
+  fAlAlloyMaterial->AddElement(Cr, 0.001);
+  fAlAlloyMaterial->AddElement(Zn, 0.0025);
+  fAlAlloyMaterial->AddElement(Ti, 0.0015);
+  fAlAlloyMaterial->AddElement(Al, 0.93118);
 
   //PMT
   G4Element* Na  = new G4Element("Sodium" ,"Na" , 11., 22.9898*g/mole);
   G4Element* Ca  = new G4Element("Calcium" ,"Ca" , 20., 40.078*g/mole);
-  G4Element* Si  = new G4Element("Silicon" ,"Si" , 14., 28.0855*g/mole);
 
   fPMTMaterial = new G4Material("PMT", 2.5*g/cm3, ncomponents=4,
                             kStateSolid, 293*kelvin, 1*atmosphere);
@@ -107,6 +124,18 @@ void DetectorConstruction::DefineMaterials()
                             kStateSolid, 293*kelvin, 1*atmosphere);
   fCH2Material->AddElement(CC, natoms=1);
   fCH2Material->AddElement(H, natoms=2);
+
+  //SiO2
+  fSiO2Material = new G4Material("SiO2", 2.2*g/cm3, ncomponents=2,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fSiO2Material->AddElement(Si, natoms=1);
+  fSiO2Material->AddElement(O, natoms=2);
+
+  //Zr
+  G4Element* Zr  = new G4Element("Zirconium" ,"Zr", 40., 91.224*g/mole);
+  fActiveMaterial = new G4Material("Zirconium", 6.49*g/cm3, ncomponents=1,
+                            kStateSolid, 293*kelvin, 1*atmosphere);
+  fActiveMaterial->AddElement(Zr, natoms=1); 
 
   // example of vacuum
   fWorldMaterial = new G4Material("Galactic", 1, 1.01*g/mole,
@@ -165,9 +194,10 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   G4double thickness_MgO = 0.2*mm; //MgO粉厚度，光反射层。
   G4double thickness_AlAlloy = 1.5*mm; // 铝合金厚度
   G4double thickness_ZrCap = fActThickness; // 锆帽厚度
+  G4double thickness_SiO2 = 1.0*mm;
 
   //① Zr Cap
-  G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap;
+  G4double LengthZrCap = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap + thickness_SiO2;
   G4double radius_ZrCap = radius_LaBr3 + thickness_MgO + thickness_AlAlloy + thickness_ZrCap; //1.0*mm;
   fActRadius = radius_ZrCap;
   fActLength = LengthZrCap;
@@ -175,6 +205,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   
   G4RotationMatrix* rm = new G4RotationMatrix();
     rm->rotateX(fActRotate*degree);
+    // rm->rotateX(0.);
   G4Tubs* ZrCup =  new G4Tubs("ZrCup", 0., radius_ZrCap, LengthZrCap*0.5, 0.0*deg, 360*deg); 
   fLActivator = new G4LogicalVolume(ZrCup, fActiveMaterial, fActiveMaterial->GetName());
   new G4PVPlacement(rm,                         //no rotation
@@ -188,7 +219,7 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
   // 铝合金外壳
   G4double LengthAlAlloy = radius_LaBr3 * 2.0 + thickness_MgO + thickness_AlAlloy;
   G4double radius_AlAlloy = radius_LaBr3 + thickness_MgO + thickness_AlAlloy; //1.0*mm;
-  G4double posZ2 =  -thickness_ZrCap*0.5;
+  G4double posZ2 =  -(LengthZrCap-LengthAlAlloy)*0.5 + thickness_SiO2;
   G4Tubs* AlAlloy_Tub =  new G4Tubs("AlAlloy_Tub", 0., radius_AlAlloy, LengthAlAlloy*0.5, 0.0*deg, 360*deg);
   fLAlAlloy = new G4LogicalVolume(AlAlloy_Tub,  fAlAlloyMaterial,  "AlAlloy");
   new G4PVPlacement(0,                         //no rotation
@@ -226,6 +257,18 @@ G4VPhysicalVolume* DetectorConstruction::ConstructVolumes()
                   false,                       //no boolean operation
                   0);                          //copy number
 
+  //石英玻璃
+  G4double posZSiO2 = -(LengthZrCap - thickness_SiO2) * 0.5;
+  G4Tubs* SiO2Solid = new G4Tubs("SiO2Solid", 0.0, radius_MgO, thickness_SiO2*0.5, 0.0*deg, 360*deg); 
+  fLSiO2 = new G4LogicalVolume(SiO2Solid, fSiO2Material, "SiO2_Logical");
+  new G4PVPlacement(0,                         //no rotation
+                  G4ThreeVector(0.,0.,posZSiO2),   //at (0,0,0)
+                  fLSiO2,                     //logical volume
+                  "SiO2_Phy",   //name
+                  fLActivator,                      //mother  volume
+                  false,                       //no boolean operation
+                  0);                          //copy number
+
   PrintParameters();
   fScoringVolume = fLLaBr3;
   //always return the root volume
@@ -248,9 +291,10 @@ void DetectorConstruction::PrintParameters()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetActMaterial(G4String materialChoice)
+void DetectorConstruction::SetActMaterial(G4String )
 {
   // search the material by its name
+  /*
   G4Material* pttoMaterial =
      G4NistManager::Instance()->FindOrBuildMaterial(materialChoice);   
   
@@ -261,7 +305,8 @@ void DetectorConstruction::SetActMaterial(G4String materialChoice)
   } else {
     G4cout << "\n--> warning from DetectorConstruction::SetMaterial : "
            << materialChoice << " not found" << G4endl;
-  }              
+  }
+  */
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

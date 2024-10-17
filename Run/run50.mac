@@ -5,7 +5,6 @@
 /control/verbose 1
 /run/verbose 1
 #
-/testhadr/activator/setMat G4_Zr
 /testhadr/activator/setThickness 50 mm
 
 /run/numberOfThreads 60
@@ -13,4 +12,4 @@
 
 /tracking/verbose 0
 /run/printProgress 500000
-/run/beamOn 500000000
+/run/beamOn 30000000

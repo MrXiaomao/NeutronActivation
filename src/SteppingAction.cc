@@ -96,7 +96,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
       dataFile_lock.lock();
       std::fstream file(fileWholePath, std::ios::app);
       file  << std::left << std::setw(20) << std::setprecision(9)<<std::fixed<<lastedep/CLHEP::keV
-            << std::left << std::setw(20) <<std::setprecision(7) << std::scientific<< lasttime <<endl;
+            << std::left << std::setw(20) <<std::setprecision(10) << std::scientific<< lasttime <<endl;
       file.close();
       dataFile_lock.unlock();
     }
@@ -120,7 +120,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
       dataFile_lock.lock();
       std::fstream file(fileWholePath, std::ios::app);
       file  << std::left << std::setw(20) << std::setprecision(9)<<std::fixed<<lastedep/CLHEP::keV
-            << std::left << std::setw(20) <<std::setprecision(7) << std::scientific<< lasttime <<endl;
+            << std::left << std::setw(20) <<std::setprecision(10) << std::scientific<< lasttime <<endl;
       file.close();
       dataFile_lock.unlock();
     }

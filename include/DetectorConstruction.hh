@@ -58,34 +58,38 @@ class DetectorConstruction : public G4VUserDetectorConstruction
    G4LogicalVolume*   fLLaBr3;
 
   // AlAlloy Al合金
-    G4Material*        fAlAlloyMaterial;
-   G4LogicalVolume*   fLAlAlloy;
+  G4Material*        fAlAlloyMaterial;
+  G4LogicalVolume*   fLAlAlloy;
 
   // MgO反射层
-   G4Material*        fMgOMaterial;
-   G4LogicalVolume*   fLMgO;
+  G4Material*        fMgOMaterial;
+  G4LogicalVolume*   fLMgO;
 
-   // PMT光电倍增管
-   G4Material*        fPMTMaterial;
-   G4LogicalVolume*   fLPMT;
-   
-    // 聚乙烯
-   G4Material*        fCH2Material;
-   G4LogicalVolume*   fLCH2;
+  // PMT光电倍增管
+  G4Material*        fPMTMaterial;
+  G4LogicalVolume*   fLPMT;
+  
+  // 聚乙烯
+  G4Material*        fCH2Material;
+  G4LogicalVolume*   fLCH2;
 
-   G4double           fWorldSizeXY;
-   G4double           fWorldSizeZ;
-   G4Material*        fWorldMaterial;
-   G4VPhysicalVolume* fWorldVolume;                        
+  //SiO2 石英玻璃
+  G4Material*        fSiO2Material;
+  G4LogicalVolume*   fLSiO2;
 
-   DetectorMessenger* fDetectorMessenger;
+  G4double           fWorldSizeXY;
+  G4double           fWorldSizeZ;
+  G4Material*        fWorldMaterial;
+  G4VPhysicalVolume* fWorldVolume;                        
 
-  private:
+  DetectorMessenger* fDetectorMessenger;
+
+private:
 
    void               DefineMaterials();
    G4VPhysicalVolume* ConstructVolumes();  
   
-  protected:
+protected:
     G4LogicalVolume* fScoringVolume;        
 };
 

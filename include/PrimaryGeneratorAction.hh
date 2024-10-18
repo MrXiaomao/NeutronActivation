@@ -30,13 +30,13 @@ class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
     G4double GetTimeExposure() {return fLengthZr;}
 
   private:
-    G4ParticleGun*             fParticleGun  = nullptr;
+    G4ParticleGun*             fParticleGun;
     G4GeneralParticleSource* fParticleGun2;
-    DetectorConstruction*      fDetector     = nullptr;
+    DetectorConstruction*      fDetector;
     G4double                   fRadiusZr; //¸äÃ±°ë¾¶
     G4double                   fLengthZr; //ï¯Ã±³¤¶È
     G4double                   fRotateZr; //ï¯Ã±Ðý×ª½Ç¶È
-    PrimaryGeneratorMessenger* fGunMessenger = nullptr;     
+    PrimaryGeneratorMessenger* fGunMessenger;     
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

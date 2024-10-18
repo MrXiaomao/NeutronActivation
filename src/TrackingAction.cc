@@ -49,8 +49,9 @@ void TrackingAction::PreUserTrackingAction(const G4Track* track)
      aTrack->SetTrackStatus(fStopAndKill);
   }
 
-  //count secondary particles
-  if (track->GetTrackID() > 1)  run->ParticleCount(name,ekin,meanLife);
+  //count secondary particles (with meanLife > 0)
+  if ((track->GetTrackID() > 1) && (meanLife > 0.))
+    run->ParticleCount(name,ekin,meanLife);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -86,21 +87,9 @@ void TrackingAction::PostUserTrackingAction(const G4Track* track)
   }
 
   run->ParticleFlux(name,ekin);
-  
-  // limit the particle life
-  if(fTrackEdep>gTrackEdepThreshold && 
-     fTimeBirth>gGountBeginTime && fTimeBirth<gTarckMaxTimeLimit){
-         // run->AddTrackEdep_Time(fTrackEdep,fTimeBirth);
-         //get the Event Number
-         // G4int eventNumber =
-         // G4RunManager::GetRunManager()->GetCurrentEvent()->GetEventID();
-         // G4cout<<"eventID = "<<eventNumber<<", EndTrack TotalEnergy="<<fTrackEdep/keV
-         //       <<" fTimeBirth="<< std::setprecision(8)<< std::setw(12)<<fTimeBirth<<G4endl;
-     } 
-
-  // keep only emerging particles
-  G4StepStatus status = track->GetStep()->GetPostStepPoint()->GetStepStatus();
-  if (status != fWorldBoundary) return; 
+ // keep only emerging particles
+ G4StepStatus status = track->GetStep()->GetPostStepPoint()->GetStepStatus();
+ if (status != fWorldBoundary) return; 
 
   fEventAction->AddEflow(ekin);
 

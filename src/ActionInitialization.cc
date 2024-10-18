@@ -1,5 +1,3 @@
-// $Id: ActionInitialization.cc 68058 2013-03-13 14:47:43Z gcosmo $
-//
 /// \file ActionInitialization.cc
 /// \brief Implementation of the ActionInitialization class
 

@@ -34,6 +34,7 @@ DetectorConstruction::DetectorConstruction(G4double rotate)
   fMgOMaterial(nullptr), fLMgO(nullptr),
   fPMTMaterial(nullptr), fLPMT(nullptr),
   fCH2Material(nullptr), fLCH2(nullptr),
+  fSiO2Material(nullptr), fLSiO2(nullptr),
   fWorldSizeXY(0.0), fWorldSizeZ(0.0),
   fWorldMaterial(nullptr), fWorldVolume(nullptr), fDetectorMessenger(nullptr),
   fScoringVolume(nullptr)

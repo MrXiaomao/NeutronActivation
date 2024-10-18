@@ -63,9 +63,6 @@ G4VPhysicalVolume* DetectorConstruction::Construct()
 
 void DetectorConstruction::DefineMaterials()
 {
-  // specific element name for thermal neutronHP
-  // (see G4ParticleHPThermalScatteringNames.cc)
-
   G4int ncomponents, natoms;
 
   //LaBr3
@@ -294,10 +291,11 @@ void DetectorConstruction::PrintParameters()
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-void DetectorConstruction::SetActMaterial(G4String materialChoice)
+void DetectorConstruction::SetActMaterial(G4String )
 {
   // search the material by its name
-  /*G4Material* pttoMaterial =
+  /*
+  G4Material* pttoMaterial =
      G4NistManager::Instance()->FindOrBuildMaterial(materialChoice);   
   
   if (pttoMaterial) { 
@@ -309,6 +307,7 @@ void DetectorConstruction::SetActMaterial(G4String materialChoice)
            << materialChoice << " not found" << G4endl;
   }
   */
+}
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
